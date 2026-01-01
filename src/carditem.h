@@ -14,6 +14,11 @@ class CardItem : public QGraphicsItem
     ~CardItem() override = default;
 
     const Card &card() const { return m_card; }
+    void setCard(const Card &card)
+    {
+        m_card = card;
+        update();
+    }
 
     virtual QRectF boundingRect() const;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

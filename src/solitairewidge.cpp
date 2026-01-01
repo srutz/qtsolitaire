@@ -84,6 +84,7 @@ void SolitaireWidget::layoutGame()
         auto yDistance = stackingDistance(pile.type);
         for (const auto &card : pile.cards) {
             auto *cardItem = findCardItem(card);
+            cardItem->setCard(card); // Update card with current side
             cardItem->setPos(pos.x(), pos.y() + yOffset);
             yOffset += yDistance;
         }
