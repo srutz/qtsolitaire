@@ -7,6 +7,7 @@
 SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
 {
     m_scene = new QGraphicsScene(this);
+    m_scene->setBackgroundBrush(QColor(107, 114, 128)); // Green background
     auto graphicsView = new QGraphicsView(m_scene, this);
     graphicsView->setObjectName("graphicsView");
     graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -35,22 +36,37 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
     for (const auto suit : {HEARTS, DIAMONDS, CLUBS, SPADES}) {
         for (const auto rank : {ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING}) {
             Card card{suit, rank, BACK};
-            auto *cardItem = new CardItem(card);
+            auto *cardItem = new CardItem(this, card);
             m_cardItems.push_back(cardItem);
             m_scene->addItem(cardItem);
         }
     }
 
     m_game.state().dump();
+    initPixmap();
     layoutGame();
 }
 
 SolitaireWidget::~SolitaireWidget()
 {
-    // delete points in m_cardItems
     for (auto cardItem : m_cardItems) {
         delete cardItem;
     }
+    for (auto pileItem : m_pileItems) {
+        delete pileItem;
+    }
+}
+
+void SolitaireWidget::initPixmap()
+{
+    if (m_pixmapLoaded) {
+        return;
+    }
+    s_backPixmap.load(":/main/resources/cards/back.png");
+    if (!s_backPixmap.isNull() && (s_backPixmap.width() != CARD_WIDTH || s_backPixmap.height() != CARD_HEIGHT)) {
+        s_backPixmap = s_backPixmap.scaled(CARD_WIDTH, CARD_HEIGHT, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+    m_pixmapLoaded = true;
 }
 
 CardItem *SolitaireWidget::findCardItem(const Card &card) const

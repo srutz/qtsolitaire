@@ -1,5 +1,6 @@
 
 #include "pileitem.h"
+#include <QDebug>
 #include <QPainter>
 
 PileItem::PileItem(const Pile &pile, QGraphicsItem *parent) : QGraphicsItem(parent), m_pile(pile) {}
@@ -11,9 +12,9 @@ void PileItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    // Simple representation: draw a rectangle and the card's string
-    painter->setBrush(Qt::yellow);
-    painter->drawRect(boundingRect());
-    painter->setPen(Qt::darkGreen);
+    painter->setBrush(QColor(107, 114, 128));
+    QRectF rect = boundingRect().adjusted(4, 4, -4, -4);
+    painter->drawRoundedRect(rect, 4, 4);
+    painter->setPen(Qt::black);
     painter->drawText(boundingRect(), Qt::AlignCenter, QString("%1").arg(m_pile.type));
 }

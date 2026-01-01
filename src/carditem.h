@@ -4,13 +4,21 @@
 
 #include "game.h"
 #include <QGraphicsItem>
+#include <QPixmap>
+
+class SolitaireWidget;
 
 class CardItem : public QGraphicsItem
 {
+    SolitaireWidget *m_solitaireWidget;
     Card m_card;
+    QPixmap m_pixmap;
+    bool m_pixmapLoaded = false;
+
+    void initPixmap();
 
   public:
-    CardItem(const Card &card, QGraphicsItem *parent = nullptr);
+    CardItem(SolitaireWidget *solitaireWidget, const Card &card, QGraphicsItem *parent = nullptr);
     ~CardItem() override = default;
 
     const Card &card() const { return m_card; }
