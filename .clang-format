@@ -1,0 +1,6 @@
+BasedOnStyle: LLVM 
+BreakBeforeBraces: Linux
+ColumnLimit: 130
+IndentWidth: 4
+AlignAfterOpenBracket: AlwaysBreak
+ContinuationIndentWidth: 4
