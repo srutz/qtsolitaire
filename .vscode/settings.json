@@ -5,9 +5,8 @@
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.codeAnalysis.clangTidy.enabled": true,
     "C_Cpp.codeAnalysis.clangTidy.checks.enabled": [
-        "clang-diagnostic-*",
+        "readability-*",
         "clang-analyzer-*",
-        "readability-*"
     ],
     "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
         "readability-identifier-length",

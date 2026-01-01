@@ -94,7 +94,7 @@ QString Pile::toString() const
 {
     QStringList cardStrs;
     for (const auto &card : cards) {
-        cardStrs << card.toString();
+        cardStrs << card.toString() + ((card.side == FRONT) ? "*" : "_");
     }
     return QString("Pile(type=%1, index=%2, size=%3, cards=[%4])")
         .arg(type)
