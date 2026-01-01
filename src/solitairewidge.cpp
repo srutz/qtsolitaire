@@ -18,8 +18,20 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
     layout->addWidget(graphicsView);
     setLayout(layout);
 
-    // init the 52 carditems and keep those objects around forever
-
+    // init the 52 carditems and the 13 piles and keep those objects around forever
+    {
+        m_pileItems.push_back(new PileItem(m_game.state().stock));
+        m_pileItems.push_back(new PileItem(m_game.state().waste));
+        for (const auto &stack : m_game.state().stacks) {
+            m_pileItems.push_back(new PileItem(stack));
+        }
+        for (const auto &table : m_game.state().tables) {
+            m_pileItems.push_back(new PileItem(table));
+        }
+        for (auto pileItem : m_pileItems) {
+            m_scene->addItem(pileItem);
+        }
+    }
     for (const auto suit : {HEARTS, DIAMONDS, CLUBS, SPADES}) {
         for (const auto rank : {ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING}) {
             Card card{suit, rank, BACK};
@@ -28,8 +40,6 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
             m_scene->addItem(cardItem);
         }
     }
-
-    // auto *box1 = m_scene->addRect(50, 50, 100, 150, QPen(Qt::black), QBrush(Qt::red));
 
     m_game.state().dump();
     layoutGame();
@@ -43,7 +53,7 @@ SolitaireWidget::~SolitaireWidget()
     }
 }
 
-CardItem *SolitaireWidget::findItem(const Card &card) const
+CardItem *SolitaireWidget::findCardItem(const Card &card) const
 {
     for (auto cardItem : this->m_cardItems) {
         if (cardItem->card().suit == card.suit && cardItem->card().rank == card.rank) {
@@ -53,27 +63,42 @@ CardItem *SolitaireWidget::findItem(const Card &card) const
     return nullptr;
 }
 
+PileItem *SolitaireWidget::findPileItem(PileType type, int index) const
+{
+    for (auto pileItem : this->m_pileItems) {
+        if (pileItem->pile().type == type && pileItem->pile().index == index) {
+            return pileItem;
+        }
+    }
+    return nullptr;
+}
+
 void SolitaireWidget::layoutGame()
 {
     const GameState &state = m_game.state();
-    auto layoutPile = [this](const Pile &pile, double x, double y) {
-        double yOffset = 0;
+
+    auto layoutPile = [this](const Pile &pile, QPoint pos) {
+        auto *pileItem = findPileItem(pile.type, pile.index);
+        pileItem->setPos(pos);
+        auto yOffset = 0;
+        auto yDistance = stackingDistance(pile.type);
         for (const auto &card : pile.cards) {
-            auto *item = findItem(card);
-            item->setPos(x, y + yOffset);
-            yOffset += 15;
+            auto *cardItem = findCardItem(card);
+            cardItem->setPos(pos.x(), pos.y() + yOffset);
+            yOffset += yDistance;
         }
     };
-    layoutPile(state.stock, 50, 50);
-    layoutPile(state.waste, 200, 50);
-    double stackX = 50;
+    layoutPile(state.stock, pileTypeAnchorPoint(PileType::STOCK));
+    layoutPile(state.waste, pileTypeAnchorPoint(PileType::WASTE));
+
+    auto stackPosition = pileTypeAnchorPoint(PileType::STACK);
     for (const auto &stack : state.stacks) {
-        layoutPile(stack, stackX, 300);
-        stackX += 120;
+        layoutPile(stack, stackPosition);
+        stackPosition += QPoint(CARD_WIDTH + CARD_XDISTANCE, 0);
     }
-    double tableX = 50;
+    auto tablePosition = pileTypeAnchorPoint(PileType::TABLE);
     for (const auto &table : state.tables) {
-        layoutPile(table, tableX, 600);
-        tableX += 120;
+        layoutPile(table, tablePosition);
+        tablePosition += QPoint(CARD_WIDTH + CARD_XDISTANCE, 0);
     }
 }

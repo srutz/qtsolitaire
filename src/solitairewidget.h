@@ -4,6 +4,7 @@
 
 #include "carditem.h"
 #include "game.h"
+#include "pileitem.h"
 #include <QGraphicsScene>
 #include <QWidget>
 
@@ -13,9 +14,11 @@ class SolitaireWidget : public QWidget
 
     QGraphicsScene *m_scene = nullptr;
     Game m_game;
+    vector<PileItem *> m_pileItems;
     vector<CardItem *> m_cardItems;
 
-    CardItem *findItem(const Card &card) const;
+    CardItem *findCardItem(const Card &card) const;
+    PileItem *findPileItem(PileType pileType, int index) const;
 
   public:
     explicit SolitaireWidget(QWidget *parent = nullptr);

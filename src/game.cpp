@@ -1,6 +1,32 @@
 #include "game.h"
 #include <QDebug>
 
+QPoint pileTypeAnchorPoint(PileType type)
+{
+    switch (type) {
+    case STOCK:
+        return QPoint(50, 50);
+    case WASTE:
+        return QPoint(50 + CARD_WIDTH + CARD_XDISTANCE, 50);
+    case STACK:
+        return QPoint(50 + 3 * (CARD_WIDTH + CARD_XDISTANCE), 50);
+    case TABLE:
+        return QPoint(50, 400);
+    default:
+        return QPoint(0, 0);
+    }
+}
+
+int stackingDistance(PileType type)
+{
+    switch (type) {
+    case TABLE:
+        return 15;
+    default:
+        return 4;
+    }
+}
+
 QString Card::toString() const
 {
     QString suit;
@@ -83,10 +109,10 @@ void GameState::dump() const
     qDebug() << "stock:" << stock.toString();
     qDebug() << "waste:" << waste.toString();
     for (const auto &stack : stacks) {
-        qDebug() << "stack:" << stack.index << "cards:" << stack.toString();
+        qDebug() << "stack:" << stack.toString();
     }
     for (const auto &table : tables) {
-        qDebug() << "table:" << table.index << "cards:" << table.toString();
+        qDebug() << "table:" << table.toString();
     }
 }
 
@@ -105,12 +131,12 @@ void Game::resetGame()
     }
     // shuffle here
 
-    m_state.stock = {.type = Stock, .index = -1, .cards = {}};
-    m_state.waste = {.type = Waste, .index = -1, .cards = {}};
+    m_state.stock = {.type = STOCK, .index = -1, .cards = {}};
+    m_state.waste = {.type = WASTE, .index = -1, .cards = {}};
 
     m_state.stacks.clear();
     for (auto i = 0; i < 4; i++) {
-        m_state.stacks.push_back({.type = Stack, .index = i, .cards = {}});
+        m_state.stacks.push_back({.type = STACK, .index = i, .cards = {}});
     }
 
     m_state.tables.clear();
@@ -124,8 +150,7 @@ void Game::resetGame()
         if (!content.empty()) {
             content.back().side = FRONT;
         }
-
-        m_state.tables.push_back({.type = Table, .index = i, .cards = content});
+        m_state.tables.push_back({.type = TABLE, .index = i, .cards = content});
     }
 
     // Remaining cards go to the stock

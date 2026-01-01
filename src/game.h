@@ -19,7 +19,7 @@ struct Card {
     QString toString() const;
 };
 
-enum PileType { Stock, Waste, Stack, Table };
+enum PileType { STOCK, WASTE, STACK, TABLE };
 
 struct Pile {
     PileType type;
@@ -52,5 +52,12 @@ class Game : public QObject
     const GameState &state() const { return m_state; }
     void resetGame();
 };
+
+const int CARD_WIDTH = 100;
+const int CARD_HEIGHT = 150;
+const int CARD_XDISTANCE = 20;
+
+QPoint pileTypeAnchorPoint(PileType type);
+int stackingDistance(PileType type);
 
 #endif // GAME_H
