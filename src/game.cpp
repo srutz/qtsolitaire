@@ -91,6 +91,11 @@ bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *de
     // Remove cards from source pile
     sourcePile->cards.erase(sourcePile->cards.begin() + startIndex, sourcePile->cards.begin() + startIndex + cards.size());
 
+    // If source pile is a TABLE and has cards remaining, flip the top card to FRONT
+    if (sourcePile->type == TABLE && !sourcePile->cards.empty()) {
+        sourcePile->cards.back().side = FRONT;
+    }
+
     return true;
 }
 
