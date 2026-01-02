@@ -12,6 +12,8 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
     graphicsView->setObjectName("graphicsView");
     graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    graphicsView->setInteractive(true);
+    // graphicsView->setDragMode(QGraphicsView::NoDrag);
 
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -144,6 +146,17 @@ PileItem *SolitaireWidget::findPileItemAt(const QPointF &scenePos)
 {
     for (auto *pileItem : m_pileItems) {
         QRectF pileRect = pileItem->boundingRect().translated(pileItem->pos());
+
+        // Extend the pile bounds to include all cards in the pile
+        const Pile *pile = &pileItem->pile();
+        Pile *actualPile = m_game.getPile(pile->type, pile->index);
+        if (actualPile && !actualPile->cards.empty()) {
+            int numCards = actualPile->cards.size();
+            int yDistance = stackingDistance(pile->type);
+            int extendedHeight = (numCards - 1) * yDistance + CARD_HEIGHT;
+            pileRect.setHeight(extendedHeight);
+        }
+
         if (pileRect.contains(scenePos)) {
             return pileItem;
         }
