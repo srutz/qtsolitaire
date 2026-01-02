@@ -162,6 +162,12 @@ void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
                 findCardsInPile(table);
         }
 
+        // Store original positions for all dragged cards
+        m_draggedCardStartPositions.clear();
+        for (auto *cardItem : draggedCards) {
+            m_draggedCardStartPositions.push_back(cardItem->pos());
+        }
+
         // Raise z-value for all dragged cards
         for (auto *cardItem : draggedCards) {
             cardItem->setZValue(1000);
@@ -182,13 +188,8 @@ void CardItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
         // Move all dragged cards together, maintaining their relative positions
         for (size_t i = 0; i < draggedCards.size(); ++i) {
-            QPointF originalPos = draggedCards[i]->pos();
-            if (i == 0) {
-                draggedCards[i]->setPos(m_dragStartPos + delta);
-            } else {
-                // Maintain relative offset from the first card
-                QPointF offset = originalPos - draggedCards[0]->pos();
-                draggedCards[i]->setPos(draggedCards[0]->pos() + offset);
+            if (i < m_draggedCardStartPositions.size()) {
+                draggedCards[i]->setPos(m_draggedCardStartPositions[i] + delta);
             }
         }
 

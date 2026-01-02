@@ -15,6 +15,7 @@ class CardItem : public QGraphicsItem
     QPixmap m_pixmap;
     bool m_pixmapLoaded = false;
     QPointF m_dragStartPos;
+    vector<QPointF> m_draggedCardStartPositions;
 
     void initPixmap();
 
