@@ -168,9 +168,9 @@ void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
             m_draggedCardStartPositions.push_back(cardItem->pos());
         }
 
-        // Raise z-value for all dragged cards
-        for (auto *cardItem : draggedCards) {
-            cardItem->setZValue(1000);
+        // Raise z-value for all dragged cards, maintaining their relative order
+        for (size_t i = 0; i < draggedCards.size(); ++i) {
+            draggedCards[i]->setZValue(1000 + i);
         }
 
         setCursor(Qt::ClosedHandCursor);
