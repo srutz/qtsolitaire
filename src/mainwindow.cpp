@@ -22,8 +22,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setMenuBar(menuBar);
 
     auto menuFile = menuBar->addMenu(tr("&File"));
-    auto actionExit = menuFile->addAction(tr("E&xit"));
-    connect(actionExit, &QAction::triggered, this, &QMainWindow::close);
 
     auto actionNewGame = menuFile->addAction(tr("&New Game"));
     connect(actionNewGame, &QAction::triggered, [solitaireWidget]() {
@@ -33,6 +31,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     auto actionDumpGameState = menuFile->addAction(tr("&Dump Game State"));
     connect(actionDumpGameState, &QAction::triggered, [solitaireWidget]() { solitaireWidget->game().state().dump(); });
+
+    menuFile->addSeparator();
+    auto actionExit = menuFile->addAction(tr("E&xit"));
+    connect(actionExit, &QAction::triggered, this, &QMainWindow::close);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) { QMainWindow::resizeEvent(event); }

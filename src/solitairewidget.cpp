@@ -98,11 +98,14 @@ void SolitaireWidget::layoutGame()
         pileItem->setPos(pos);
         auto yOffset = 0;
         auto yDistance = stackingDistance(pile.type);
+        qreal zValue = 0;
         for (const auto &card : pile.cards) {
             auto *cardItem = findCardItem(card);
             cardItem->setCard(card); // Update card with current side
             cardItem->setPos(pos.x(), pos.y() + yOffset);
+            cardItem->setZValue(zValue);
             yOffset += yDistance;
+            zValue += 1;
         }
     };
     layoutPile(state.stock, pileTypeAnchorPoint(PileType::STOCK));
