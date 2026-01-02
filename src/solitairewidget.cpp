@@ -150,3 +150,11 @@ PileItem *SolitaireWidget::findPileItemAt(const QPointF &scenePos)
     }
     return nullptr;
 }
+
+Pile *SolitaireWidget::getPileForPileItem(PileItem *pileItem)
+{
+    if (!pileItem) {
+        return nullptr;
+    }
+    return m_game.getPile(pileItem->pile().type, pileItem->pile().index);
+}

@@ -51,6 +51,11 @@ class Game : public QObject
 
     const GameState &state() const { return m_state; }
     void resetGame();
+
+    // Modifier methods for moving cards
+    Pile *getPileContainingCard(const Card &card);
+    Pile *getPile(PileType type, int index);
+    bool moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile);
 };
 
 const int CARD_WIDTH = 100;

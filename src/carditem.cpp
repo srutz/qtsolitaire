@@ -212,11 +212,32 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 cardItem->setZValue(0);
             }
 
+            // Check if there's a pile under the cursor
+            PileItem *destPileItem = m_solitaireWidget->findPileItemAt(event->scenePos());
+
+            if (destPileItem) {
+                // Find the source pile
+                Pile *sourcePile = m_solitaireWidget->game().getPileContainingCard(draggedCards[0]->card());
+
+                // Get destination pile
+                Pile *destPile = m_solitaireWidget->getPileForPileItem(destPileItem);
+
+                // Build vector of cards being moved
+                vector<Card> cardsToMove;
+                for (auto *cardItem : draggedCards) {
+                    cardsToMove.push_back(cardItem->card());
+                }
+
+                // Attempt to move the cards
+                if (destPile && sourcePile && sourcePile != destPile) {
+                    m_solitaireWidget->game().moveCardsToPile(cardsToMove, sourcePile, destPile);
+                }
+            }
+
             // Clear highlighted pile
             m_solitaireWidget->setHighlightedPile(nullptr);
 
-            // TODO: Implement drop logic here to validate and update game state
-            // For now, just snap back to the original position
+            // Re-layout the game to reflect the new state
             m_solitaireWidget->layoutGame();
 
             draggedCards.clear();

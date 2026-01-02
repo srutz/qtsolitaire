@@ -38,6 +38,7 @@ class SolitaireWidget : public QWidget
     void clearDraggedCards() { m_draggedCardItems.clear(); }
     void setHighlightedPile(PileItem *pile);
     PileItem *findPileItemAt(const QPointF &scenePos);
+    Pile *getPileForPileItem(PileItem *pileItem);
 };
 
 #endif // SOLITAIREWIDGET_H

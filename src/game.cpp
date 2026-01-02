@@ -5,6 +5,95 @@
 
 using namespace std;
 
+Pile *Game::getPileContainingCard(const Card &card)
+{
+    // Check waste pile
+    for (const auto &c : m_state.waste.cards) {
+        if (c.suit == card.suit && c.rank == card.rank) {
+            return &m_state.waste;
+        }
+    }
+
+    // Check stacks
+    for (auto &stack : m_state.stacks) {
+        for (const auto &c : stack.cards) {
+            if (c.suit == card.suit && c.rank == card.rank) {
+                return &stack;
+            }
+        }
+    }
+
+    // Check tables
+    for (auto &table : m_state.tables) {
+        for (const auto &c : table.cards) {
+            if (c.suit == card.suit && c.rank == card.rank) {
+                return &table;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+Pile *Game::getPile(PileType type, int index)
+{
+    if (type == WASTE) {
+        return &m_state.waste;
+    } else if (type == STOCK) {
+        return &m_state.stock;
+    } else if (type == STACK) {
+        for (auto &stack : m_state.stacks) {
+            if (stack.index == index) {
+                return &stack;
+            }
+        }
+    } else if (type == TABLE) {
+        for (auto &table : m_state.tables) {
+            if (table.index == index) {
+                return &table;
+            }
+        }
+    }
+    return nullptr;
+}
+
+bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile)
+{
+    if (!sourcePile || !destPile || cards.empty()) {
+        return false;
+    }
+
+    // Find the position of the first card to move in the source pile
+    size_t startIndex = 0;
+    bool found = false;
+    for (size_t i = 0; i < sourcePile->cards.size(); ++i) {
+        if (sourcePile->cards[i].suit == cards[0].suit && sourcePile->cards[i].rank == cards[0].rank) {
+            startIndex = i;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        return false;
+    }
+
+    // Verify that all cards to move are consecutive in the source pile
+    if (startIndex + cards.size() > sourcePile->cards.size()) {
+        return false;
+    }
+
+    // Move cards to destination pile
+    for (const auto &card : cards) {
+        destPile->cards.push_back(card);
+    }
+
+    // Remove cards from source pile
+    sourcePile->cards.erase(sourcePile->cards.begin() + startIndex, sourcePile->cards.begin() + startIndex + cards.size());
+
+    return true;
+}
+
 QPoint pileTypeAnchorPoint(PileType type)
 {
     switch (type) {
