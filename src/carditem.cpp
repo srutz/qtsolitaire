@@ -1,7 +1,10 @@
 
 #include "carditem.h"
+#include "pileitem.h"
 #include "solitairewidget.h"
+#include <QCursor>
 #include <QDebug>
+#include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 
 // Static back image loaded once and shared by all card instances
@@ -11,6 +14,8 @@
 CardItem::CardItem(SolitaireWidget *solitaireWidget, const Card &card, QGraphicsItem *parent)
     : QGraphicsItem(parent), m_solitaireWidget(solitaireWidget), m_card(card)
 {
+    setAcceptedMouseButtons(Qt::LeftButton);
+    setFlag(QGraphicsItem::ItemIsMovable, false); // We'll handle movement manually
 }
 
 void CardItem::initPixmap()
@@ -111,5 +116,115 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         painter->setFont(QFont("Arial", 8));
         painter->drawText(
             boundingRect(), Qt::AlignTop | Qt::AlignLeft, m_card.toString() + (m_card.side == FRONT ? " (F)" : " (B)"));
+    }
+}
+
+void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton && m_card.side == FRONT) {
+        m_dragStartPos = pos();
+
+        // Find all cards in the same pile that are below this card
+        auto &draggedCards = m_solitaireWidget->draggedCardItems();
+        draggedCards.clear();
+
+        // Find which pile this card belongs to and get all cards from this one down
+        const auto &state = m_solitaireWidget->game().state();
+        bool foundThisCard = false;
+
+        auto findCardsInPile = [&](const Pile &pile) {
+            for (size_t i = 0; i < pile.cards.size(); ++i) {
+                const auto &card = pile.cards[i];
+                if (card.suit == m_card.suit && card.rank == m_card.rank) {
+                    foundThisCard = true;
+                }
+                if (foundThisCard) {
+                    // Find the CardItem for this card and add to dragged list
+                    for (auto *item : scene()->items()) {
+                        if (auto *cardItem = dynamic_cast<CardItem *>(item)) {
+                            if (cardItem->card().suit == card.suit && cardItem->card().rank == card.rank) {
+                                draggedCards.push_back(cardItem);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        findCardsInPile(state.waste);
+        for (const auto &stack : state.stacks) {
+            if (!foundThisCard)
+                findCardsInPile(stack);
+        }
+        for (const auto &table : state.tables) {
+            if (!foundThisCard)
+                findCardsInPile(table);
+        }
+
+        // Raise z-value for all dragged cards
+        for (auto *cardItem : draggedCards) {
+            cardItem->setZValue(1000);
+        }
+
+        setCursor(Qt::ClosedHandCursor);
+        event->accept();
+    } else {
+        event->ignore();
+    }
+}
+
+void CardItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    auto &draggedCards = m_solitaireWidget->draggedCardItems();
+    if (!draggedCards.empty() && draggedCards[0] == this) {
+        QPointF delta = event->scenePos() - event->buttonDownScenePos(Qt::LeftButton);
+
+        // Move all dragged cards together, maintaining their relative positions
+        for (size_t i = 0; i < draggedCards.size(); ++i) {
+            QPointF originalPos = draggedCards[i]->pos();
+            if (i == 0) {
+                draggedCards[i]->setPos(m_dragStartPos + delta);
+            } else {
+                // Maintain relative offset from the first card
+                QPointF offset = originalPos - draggedCards[0]->pos();
+                draggedCards[i]->setPos(draggedCards[0]->pos() + offset);
+            }
+        }
+
+        // Check for pile highlighting
+        PileItem *pileUnderCursor = m_solitaireWidget->findPileItemAt(event->scenePos());
+        m_solitaireWidget->setHighlightedPile(pileUnderCursor);
+
+        event->accept();
+    } else {
+        event->ignore();
+    }
+}
+
+void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+        auto &draggedCards = m_solitaireWidget->draggedCardItems();
+        if (!draggedCards.empty() && draggedCards[0] == this) {
+            // Reset z-value for all dragged cards
+            for (auto *cardItem : draggedCards) {
+                cardItem->setZValue(0);
+            }
+
+            // Clear highlighted pile
+            m_solitaireWidget->setHighlightedPile(nullptr);
+
+            // TODO: Implement drop logic here to validate and update game state
+            // For now, just snap back to the original position
+            m_solitaireWidget->layoutGame();
+
+            draggedCards.clear();
+        }
+
+        setCursor(Qt::ArrowCursor);
+        event->accept();
+    } else {
+        event->ignore();
     }
 }

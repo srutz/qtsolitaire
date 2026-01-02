@@ -1,5 +1,9 @@
 #include "game.h"
 #include <QDebug>
+#include <algorithm>
+#include <random>
+
+using namespace std;
 
 QPoint pileTypeAnchorPoint(PileType type)
 {
@@ -130,6 +134,7 @@ void Game::resetGame()
         }
     }
     // shuffle here
+    shuffle(deck.begin(), deck.end(), mt19937{std::random_device{}()});
 
     m_state.stock = {.type = STOCK, .index = -1, .cards = {}};
     m_state.waste = {.type = WASTE, .index = -1, .cards = {}};

@@ -119,3 +119,31 @@ void SolitaireWidget::layoutGame()
         tablePosition += QPoint(CARD_WIDTH + CARD_XDISTANCE, 0);
     }
 }
+
+void SolitaireWidget::setHighlightedPile(PileItem *pile)
+{
+    if (m_highlightedPile == pile) {
+        return;
+    }
+
+    if (m_highlightedPile != nullptr) {
+        m_highlightedPile->setHighlighted(false);
+    }
+
+    m_highlightedPile = pile;
+
+    if (m_highlightedPile != nullptr) {
+        m_highlightedPile->setHighlighted(true);
+    }
+}
+
+PileItem *SolitaireWidget::findPileItemAt(const QPointF &scenePos)
+{
+    for (auto *pileItem : m_pileItems) {
+        QRectF pileRect = pileItem->boundingRect().translated(pileItem->pos());
+        if (pileRect.contains(scenePos)) {
+            return pileItem;
+        }
+    }
+    return nullptr;
+}

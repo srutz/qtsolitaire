@@ -25,6 +25,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     auto actionExit = menuFile->addAction(tr("E&xit"));
     connect(actionExit, &QAction::triggered, this, &QMainWindow::close);
 
+    auto actionNewGame = menuFile->addAction(tr("&New Game"));
+    connect(actionNewGame, &QAction::triggered, [solitaireWidget]() {
+        solitaireWidget->game().resetGame();
+        solitaireWidget->layoutGame();
+    });
+
     auto actionDumpGameState = menuFile->addAction(tr("&Dump Game State"));
     connect(actionDumpGameState, &QAction::triggered, [solitaireWidget]() { solitaireWidget->game().state().dump(); });
 }

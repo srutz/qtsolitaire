@@ -19,6 +19,8 @@ class SolitaireWidget : public QWidget
     vector<CardItem *> m_cardItems;
     bool m_pixmapLoaded = false;
     QPixmap s_backPixmap;
+    vector<CardItem *> m_draggedCardItems;
+    PileItem *m_highlightedPile = nullptr;
 
     void initPixmap();
     CardItem *findCardItem(const Card &card) const;
@@ -31,6 +33,11 @@ class SolitaireWidget : public QWidget
     const QPixmap &backPixmap() const { return s_backPixmap; }
     Game &game() { return m_game; }
     void layoutGame();
+
+    vector<CardItem *> &draggedCardItems() { return m_draggedCardItems; }
+    void clearDraggedCards() { m_draggedCardItems.clear(); }
+    void setHighlightedPile(PileItem *pile);
+    PileItem *findPileItemAt(const QPointF &scenePos);
 };
 
 #endif // SOLITAIREWIDGET_H
