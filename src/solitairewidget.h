@@ -29,6 +29,7 @@ class SolitaireWidget : public QWidget
     ~SolitaireWidget() override;
 
     const QPixmap &backPixmap() const { return s_backPixmap; }
+    Game &game() { return m_game; }
     void layoutGame();
 };
 

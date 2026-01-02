@@ -12,6 +12,9 @@ void PileItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
+    // set to smooth rendering
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
     painter->setBrush(QColor(107, 114, 128));
     QRectF rect = boundingRect().adjusted(4, 4, -4, -4);
     painter->drawRoundedRect(rect, 4, 4);
