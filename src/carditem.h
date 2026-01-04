@@ -2,13 +2,14 @@
 #ifndef CARDITEM_H
 #define CARDITEM_H
 
+#include "animateditem.h"
 #include "game.h"
 #include <QGraphicsItem>
 #include <QPixmap>
 
 class SolitaireWidget;
 
-class CardItem : public QGraphicsItem
+class CardItem : public AnimatedItem
 {
     SolitaireWidget *m_solitaireWidget;
     Card m_card;

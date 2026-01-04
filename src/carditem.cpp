@@ -12,7 +12,7 @@
 // static bool s_backPixmapLoaded = false;
 
 CardItem::CardItem(SolitaireWidget *solitaireWidget, const Card &card, QGraphicsItem *parent)
-    : QGraphicsItem(parent), m_solitaireWidget(solitaireWidget), m_card(card)
+    : AnimatedItem(parent), m_solitaireWidget(solitaireWidget), m_card(card)
 {
     setAcceptedMouseButtons(Qt::LeftButton);
     setFlag(QGraphicsItem::ItemIsMovable, false); // We'll handle movement manually
@@ -216,7 +216,7 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             // Check if there's a pile under the cursor
             PileItem *destPileItem = m_solitaireWidget->findPileItemAt(event->scenePos());
 
-            if (destPileItem) {
+            if (destPileItem != nullptr) {
                 // Find the source pile
                 Pile *sourcePile = m_solitaireWidget->game().getPileContainingCard(draggedCards[0]->card());
 
@@ -230,7 +230,7 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 }
 
                 // Attempt to move the cards
-                if (destPile && sourcePile && sourcePile != destPile) {
+                if (destPile != nullptr && sourcePile != nullptr && sourcePile != destPile) {
                     m_solitaireWidget->game().moveCardsToPile(cardsToMove, sourcePile, destPile);
                 }
             }

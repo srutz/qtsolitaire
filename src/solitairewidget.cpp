@@ -104,7 +104,7 @@ void SolitaireWidget::layoutGame()
         for (const auto &card : pile.cards) {
             auto *cardItem = findCardItem(card);
             cardItem->setCard(card); // Update card with current side
-            cardItem->setPos(pos.x(), pos.y() + yOffset);
+            cardItem->setPosAnimated(QPoint(pos.x(), pos.y() + yOffset), 80);
             cardItem->setZValue(zValue);
             yOffset += yDistance;
             zValue += 1;
