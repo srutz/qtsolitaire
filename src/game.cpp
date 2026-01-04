@@ -142,7 +142,7 @@ int stackingDistance(PileType type)
 {
     switch (type) {
     case TABLE:
-        return 15;
+        return 18;
     default:
         return 3;
     }
