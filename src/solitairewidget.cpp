@@ -43,8 +43,6 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
             m_scene->addItem(cardItem);
         }
     }
-
-    m_game.state().dump();
     initPixmap();
     layoutGame();
 }

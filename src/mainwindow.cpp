@@ -33,6 +33,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(actionDumpGameState, &QAction::triggered, [solitaireWidget]() { solitaireWidget->game().state().dump(); });
 
     menuFile->addSeparator();
+    auto actionUndo = menuFile->addAction(tr("&Undo"));
+    actionUndo->setShortcut(QKeySequence::Undo);
+    connect(actionUndo, &QAction::triggered, [solitaireWidget]() {
+        solitaireWidget->game().undo();
+        solitaireWidget->layoutGame();
+    });
+
+    auto actionRedo = menuFile->addAction(tr("&Redo"));
+    actionRedo->setShortcut(QKeySequence::Redo);
+    connect(actionRedo, &QAction::triggered, [solitaireWidget]() {
+        solitaireWidget->game().redo();
+        solitaireWidget->layoutGame();
+    });
+
+    menuFile->addSeparator();
     auto actionExit = menuFile->addAction(tr("E&xit"));
     connect(actionExit, &QAction::triggered, this, &QMainWindow::close);
 }

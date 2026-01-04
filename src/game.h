@@ -44,6 +44,8 @@ class Game : public QObject
     Q_OBJECT
 
     GameState m_state;
+    vector<GameState> m_history;
+    size_t m_historyPointer = 0;
 
   public:
     Game(QObject *parent = nullptr);
@@ -58,6 +60,13 @@ class Game : public QObject
     bool moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile);
     void handleStockCardClick();
     void recycleWasteToStock();
+
+    // Undo/redo support
+    void saveState();
+    bool canUndo() const;
+    bool canRedo() const;
+    void undo();
+    void redo();
 };
 
 const int CARD_WIDTH = 100;

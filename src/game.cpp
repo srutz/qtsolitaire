@@ -5,6 +5,45 @@
 
 using namespace std;
 
+void Game::saveState()
+{
+    // Remove any states after the current pointer (if we're not at the end)
+    if (m_historyPointer < m_history.size() - 1) {
+        m_history.erase(m_history.begin() + m_historyPointer + 1, m_history.end());
+    }
+
+    // Add current state to history
+    m_history.push_back(m_state);
+    m_historyPointer = m_history.size() - 1;
+
+    // history limit
+    const int MAX_HISTORY = 1'000;
+    if (m_history.size() > MAX_HISTORY) {
+        m_history.erase(m_history.begin());
+        m_historyPointer--;
+    }
+}
+
+bool Game::canUndo() const { return m_historyPointer > 0; }
+
+bool Game::canRedo() const { return m_historyPointer < m_history.size() - 1; }
+
+void Game::undo()
+{
+    if (canUndo()) {
+        m_historyPointer--;
+        m_state = m_history[m_historyPointer];
+    }
+}
+
+void Game::redo()
+{
+    if (canRedo()) {
+        m_historyPointer++;
+        m_state = m_history[m_historyPointer];
+    }
+}
+
 Pile *Game::getPileContainingCard(const Card &card)
 {
     for (const auto &c : m_state.stock.cards) {
@@ -58,9 +97,12 @@ Pile *Game::getPile(PileType type, int index)
 
 bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile)
 {
-    if (!sourcePile || !destPile || cards.empty()) {
+    if (sourcePile == nullptr || destPile == nullptr || cards.empty()) {
         return false;
     }
+
+    // Save state before making changes
+    saveState();
 
     // Find the position of the first card to move in the source pile
     size_t startIndex = 0;
@@ -101,6 +143,8 @@ bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *de
 void Game::handleStockCardClick()
 {
     if (!m_state.stock.cards.empty()) {
+        // Save state before making changes
+        saveState();
         // Take the top card from stock
         Card topCard = m_state.stock.cards.back();
         m_state.stock.cards.pop_back();
@@ -113,6 +157,9 @@ void Game::handleStockCardClick()
 
 void Game::recycleWasteToStock()
 {
+    // Save state before making changes
+    saveState();
+
     // Move all cards from waste back to stock with back side
     while (!m_state.waste.cards.empty()) {
         Card card = m_state.waste.cards.back();
@@ -277,4 +324,9 @@ void Game::resetGame()
 
     // Remaining cards go to the stock
     this->m_state.stock.cards = deck;
+
+    // Reset undo/redo history
+    m_history.clear();
+    m_history.push_back(m_state);
+    m_historyPointer = 0;
 }

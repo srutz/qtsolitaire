@@ -271,24 +271,17 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                     return;
                 }
 
-                // Build vector of cards being moved
+                // push state and move them
                 vector<Card> cardsToMove;
                 for (auto *cardItem : draggedCards) {
                     cardsToMove.push_back(cardItem->card());
                 }
-
-                // Attempt to move the cards
                 if (destPile != nullptr && sourcePile != nullptr && sourcePile != destPile) {
                     m_solitaireWidget->game().moveCardsToPile(cardsToMove, sourcePile, destPile);
                 }
             }
-
-            // Clear highlighted pile
             m_solitaireWidget->setHighlightedPile(nullptr);
-
-            // Re-layout the game to reflect the new state
             m_solitaireWidget->layoutGame();
-
             draggedCards.clear();
         }
 
