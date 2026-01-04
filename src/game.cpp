@@ -7,14 +7,16 @@ using namespace std;
 
 Pile *Game::getPileContainingCard(const Card &card)
 {
-    // Check waste pile
+    for (const auto &c : m_state.stock.cards) {
+        if (c.suit == card.suit && c.rank == card.rank) {
+            return &m_state.stock;
+        }
+    }
     for (const auto &c : m_state.waste.cards) {
         if (c.suit == card.suit && c.rank == card.rank) {
             return &m_state.waste;
         }
     }
-
-    // Check stacks
     for (auto &stack : m_state.stacks) {
         for (const auto &c : stack.cards) {
             if (c.suit == card.suit && c.rank == card.rank) {
@@ -22,8 +24,6 @@ Pile *Game::getPileContainingCard(const Card &card)
             }
         }
     }
-
-    // Check tables
     for (auto &table : m_state.tables) {
         for (const auto &c : table.cards) {
             if (c.suit == card.suit && c.rank == card.rank) {
@@ -31,7 +31,6 @@ Pile *Game::getPileContainingCard(const Card &card)
             }
         }
     }
-
     return nullptr;
 }
 
@@ -99,6 +98,30 @@ bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *de
     return true;
 }
 
+void Game::handleStockCardClick()
+{
+    if (!m_state.stock.cards.empty()) {
+        // Take the top card from stock
+        Card topCard = m_state.stock.cards.back();
+        m_state.stock.cards.pop_back();
+        // Flip it to front
+        topCard.side = FRONT;
+        // Put it on waste
+        m_state.waste.cards.push_back(topCard);
+    }
+}
+
+void Game::recycleWasteToStock()
+{
+    // Move all cards from waste back to stock with back side
+    while (!m_state.waste.cards.empty()) {
+        Card card = m_state.waste.cards.back();
+        m_state.waste.cards.pop_back();
+        card.side = BACK;
+        m_state.stock.cards.push_back(card);
+    }
+}
+
 QPoint pileTypeAnchorPoint(PileType type)
 {
     switch (type) {
@@ -109,7 +132,7 @@ QPoint pileTypeAnchorPoint(PileType type)
     case STACK:
         return QPoint(50 + 3 * (CARD_WIDTH + CARD_XDISTANCE), 50);
     case TABLE:
-        return QPoint(50, 400);
+        return QPoint(50, 300);
     default:
         return QPoint(0, 0);
     }
@@ -121,7 +144,7 @@ int stackingDistance(PileType type)
     case TABLE:
         return 15;
     default:
-        return 4;
+        return 3;
     }
 }
 

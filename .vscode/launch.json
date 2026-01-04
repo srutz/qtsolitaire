@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "qt5mappanel (gdb)",
+            "name": "qtsolitaire (gdb)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/qt5mappanel",
+            "program": "${workspaceFolder}/build/qtsolitaire",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

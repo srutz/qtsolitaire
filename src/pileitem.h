@@ -6,13 +6,17 @@
 #include "game.h"
 #include <QGraphicsItem>
 
+class SolitaireWidget;
+
 class PileItem : public QGraphicsItem
 {
     Pile m_pile;
     bool m_highlighted = false;
+    SolitaireWidget *m_solitaireWidget = nullptr;
 
   public:
     PileItem(const Pile &pile, QGraphicsItem *parent = nullptr);
+    PileItem(const Pile &pile, SolitaireWidget *solitaireWidget, QGraphicsItem *parent = nullptr);
     ~PileItem() override = default;
 
     const Pile &pile() const { return m_pile; }
@@ -25,6 +29,9 @@ class PileItem : public QGraphicsItem
 
     virtual QRectF boundingRect() const;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+  protected:
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 };
 
 #endif // PILEITEM_H

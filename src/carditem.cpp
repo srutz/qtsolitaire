@@ -250,3 +250,19 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         event->ignore();
     }
 }
+
+void CardItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+        // Check if this card is on the stock pile
+        Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
+        if (pile && pile->type == STOCK) {
+            // Handle stock card click - flip and move to waste
+            m_solitaireWidget->game().handleStockCardClick();
+            m_solitaireWidget->layoutGame();
+            event->accept();
+            return;
+        }
+    }
+    event->ignore();
+}

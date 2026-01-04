@@ -23,13 +23,13 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
 
     // init the 52 carditems and the 13 piles and keep those objects around forever
     {
-        m_pileItems.push_back(new PileItem(m_game.state().stock));
-        m_pileItems.push_back(new PileItem(m_game.state().waste));
+        m_pileItems.push_back(new PileItem(m_game.state().stock, this));
+        m_pileItems.push_back(new PileItem(m_game.state().waste, this));
         for (const auto &stack : m_game.state().stacks) {
-            m_pileItems.push_back(new PileItem(stack));
+            m_pileItems.push_back(new PileItem(stack, this));
         }
         for (const auto &table : m_game.state().tables) {
-            m_pileItems.push_back(new PileItem(table));
+            m_pileItems.push_back(new PileItem(table, this));
         }
         for (auto pileItem : m_pileItems) {
             m_scene->addItem(pileItem);

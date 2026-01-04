@@ -1,9 +1,17 @@
 
 #include "pileitem.h"
+#include "solitairewidget.h"
 #include <QDebug>
+#include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 
 PileItem::PileItem(const Pile &pile, QGraphicsItem *parent) : QGraphicsItem(parent), m_pile(pile) {}
+
+PileItem::PileItem(const Pile &pile, SolitaireWidget *solitaireWidget, QGraphicsItem *parent)
+    : QGraphicsItem(parent), m_pile(pile), m_solitaireWidget(solitaireWidget)
+{
+    setAcceptedMouseButtons(Qt::LeftButton);
+}
 
 QRectF PileItem::boundingRect() const { return QRectF(0, 0, 100, 150); }
 
@@ -31,4 +39,20 @@ void PileItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         painter->setPen(QColor::fromRgb(0x374151));
         painter->drawText(boundingRect(), Qt::AlignCenter, QString("Stack"));
     }
+}
+
+void PileItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton && m_pile.type == STOCK && m_solitaireWidget) {
+        // Check if stock pile is empty
+        Pile *stockPile = m_solitaireWidget->game().getPile(STOCK, -1);
+        if (stockPile && stockPile->cards.empty()) {
+            // Recycle waste back to stock
+            m_solitaireWidget->game().recycleWasteToStock();
+            m_solitaireWidget->layoutGame();
+            event->accept();
+            return;
+        }
+    }
+    event->ignore();
 }

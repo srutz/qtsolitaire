@@ -56,6 +56,8 @@ class Game : public QObject
     Pile *getPileContainingCard(const Card &card);
     Pile *getPile(PileType type, int index);
     bool moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile);
+    void handleStockCardClick();
+    void recycleWasteToStock();
 };
 
 const int CARD_WIDTH = 100;
