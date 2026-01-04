@@ -17,18 +17,18 @@ void PileItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
     // Use different color when highlighted
     if (m_highlighted) {
-        painter->setBrush(QColor(100, 200, 100, 150)); // Green highlight
-        painter->setPen(QPen(QColor(50, 255, 50), 3)); // Bright green border
+        painter->setBrush(QColor::fromRgb(0x9ca3af));
+        painter->setPen(QColor::fromRgb(0x374151)); // Bright green border
     } else {
-        painter->setBrush(QColor(107, 114, 128));
-        painter->setPen(Qt::NoPen);
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(QColor::fromRgb(0x4b5563));
     }
 
     QRectF rect = boundingRect().adjusted(4, 4, -4, -4);
     painter->drawRoundedRect(rect, 4, 4);
 
-    if (!m_highlighted) {
-        painter->setPen(Qt::black);
-        painter->drawText(boundingRect(), Qt::AlignCenter, QString("%1").arg(m_pile.type));
+    if (m_pile.type == STACK) {
+        painter->setPen(QColor::fromRgb(0x374151));
+        painter->drawText(boundingRect(), Qt::AlignCenter, QString("Stack"));
     }
 }
