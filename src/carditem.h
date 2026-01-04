@@ -20,7 +20,7 @@ class CardItem : public AnimatedItem
     vector<QPointF> m_draggedCardStartPositions;
 
     void initPixmap();
-    bool isValidMove(const GameState &state, const vector<CardItem *> &draggedCardItems, Pile *sourcePile, Pile *destPile);
+    bool isValidMove(const vector<CardItem *> &draggedCardItems, Pile *sourcePile, Pile *destPile);
 
   public:
     CardItem(SolitaireWidget *solitaireWidget, const Card &card, QGraphicsItem *parent = nullptr);
@@ -36,7 +36,6 @@ class CardItem : public AnimatedItem
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 };
 
 #endif // CARDITEM_H

@@ -143,6 +143,17 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
 void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    if (event->button() == Qt::LeftButton) {
+        // Handle stock card click - flip and move to waste
+        Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
+        if (pile != nullptr && pile->type == STOCK) {
+            m_solitaireWidget->game().handleStockCardClick();
+            m_solitaireWidget->layoutGame();
+            event->accept();
+            return;
+        }
+    }
+
     if (event->button() == Qt::LeftButton && m_card.side == FRONT) {
         m_dragStartPos = pos();
 
@@ -245,7 +256,7 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 // Get destination pile
                 Pile *destPile = m_solitaireWidget->getPileForPileItem(destPileItem);
 
-                if (!isValidMove(m_solitaireWidget->game().state(), draggedCards, sourcePile, destPile)) {
+                if (!isValidMove(draggedCards, sourcePile, destPile)) {
                     // Invalid move, return cards to original positions
                     for (size_t i = 0; i < draggedCards.size(); ++i) {
                         if (i < m_draggedCardStartPositions.size()) {
@@ -288,22 +299,7 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     }
 }
 
-void CardItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton) {
-        Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
-        if (pile != nullptr && pile->type == STOCK) {
-            // Handle stock card click - flip and move to waste
-            m_solitaireWidget->game().handleStockCardClick();
-            m_solitaireWidget->layoutGame();
-            event->accept();
-            return;
-        }
-    }
-    event->ignore();
-}
-
-bool CardItem::isValidMove(const GameState &state, const vector<CardItem *> &draggedCardItems, Pile *sourcePile, Pile *destPile)
+bool CardItem::isValidMove(const vector<CardItem *> &draggedCardItems, Pile *sourcePile, Pile *destPile)
 {
     if (sourcePile == nullptr || destPile == nullptr || draggedCardItems.empty()) {
         return false;
@@ -330,8 +326,23 @@ bool CardItem::isValidMove(const GameState &state, const vector<CardItem *> &dra
             }
         }
     } else if (destPile->type == TABLE) {
-        return false;
-    }
+        if (!destPile->cards.empty()) {
+            // Now check the bottom card of the dragged sequence against the top card of the destination pile
+            const auto &topDraggedCard = draggedCardItems[0]->card();
+            const auto &topPileCard = destPile->cards.back();
 
+            // Must be alternating colors and one rank lower
+            auto isRed = [](Suit suit) { return suit == HEARTS || suit == DIAMONDS; };
+            auto isBlack = [](Suit suit) { return suit == CLUBS || suit == SPADES; };
+
+            auto alternatingColors = (isRed(topDraggedCard.suit) && isBlack(topPileCard.suit)) ||
+                                     (isBlack(topDraggedCard.suit) && isRed(topPileCard.suit));
+
+            auto validMove = alternatingColors && topDraggedCard.rank == topPileCard.rank - 1;
+            if (!validMove) {
+                return false;
+            }
+        }
+    }
     return true;
 }

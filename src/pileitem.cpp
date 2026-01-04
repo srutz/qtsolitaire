@@ -41,7 +41,7 @@ void PileItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     }
 }
 
-void PileItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+void PileItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton && m_pile.type == STOCK && m_solitaireWidget) {
         // Check if stock pile is empty
