@@ -18,6 +18,18 @@ CardItem::CardItem(SolitaireWidget *solitaireWidget, const Card &card, QGraphics
     setFlag(QGraphicsItem::ItemIsMovable, false); // We'll handle movement manually
 }
 
+void CardItem::setCard(const Card &card)
+{
+    m_card = card;
+    update();
+}
+
+void CardItem::setHighlighted(bool highlighted)
+{
+    m_highlighted = highlighted;
+    update();
+}
+
 void CardItem::initPixmap()
 {
     if (m_pixmapLoaded) {
@@ -104,6 +116,7 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
     initPixmap();
 
+    painter->setRenderHint(QPainter::Antialiasing, true);
     // Draw the card image
     if (!m_pixmap.isNull()) {
         painter->drawPixmap(0, 0, m_card.side == FRONT ? m_pixmap : m_solitaireWidget->backPixmap());
@@ -116,6 +129,15 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         painter->setFont(QFont("Arial", 8));
         painter->drawText(
             boundingRect(), Qt::AlignTop | Qt::AlignLeft, m_card.toString() + (m_card.side == FRONT ? " (F)" : " (B)"));
+    }
+
+    // Draw highlight border if highlighted
+    if (m_highlighted) {
+        painter->setBrush(QColor::fromRgba(0x4f9ca3af));
+        painter->setPen(QColor::fromRgb(0x374151));
+
+        QRectF rect = boundingRect(); //.adjusted(1, 1, 1, 1);
+        painter->drawRoundedRect(rect, 4, 4);
     }
 }
 
@@ -173,7 +195,7 @@ void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
             draggedCards[i]->setZValue(1000 + i);
         }
 
-        setCursor(Qt::ClosedHandCursor);
+        setCursor(Qt::OpenHandCursor);
         event->accept();
     } else {
         event->ignore();
@@ -223,6 +245,21 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 // Get destination pile
                 Pile *destPile = m_solitaireWidget->getPileForPileItem(destPileItem);
 
+                if (!isValidMove(m_solitaireWidget->game().state(), draggedCards, sourcePile, destPile)) {
+                    // Invalid move, return cards to original positions
+                    for (size_t i = 0; i < draggedCards.size(); ++i) {
+                        if (i < m_draggedCardStartPositions.size()) {
+                            draggedCards[i]->setPosAnimated(m_draggedCardStartPositions[i]);
+                        }
+                    }
+                    m_solitaireWidget->setHighlightedPile(nullptr);
+                    m_solitaireWidget->layoutGame();
+                    draggedCards.clear();
+                    setCursor(Qt::ArrowCursor);
+                    event->accept();
+                    return;
+                }
+
                 // Build vector of cards being moved
                 vector<Card> cardsToMove;
                 for (auto *cardItem : draggedCards) {
@@ -254,9 +291,8 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 void CardItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        // Check if this card is on the stock pile
         Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
-        if (pile && pile->type == STOCK) {
+        if (pile != nullptr && pile->type == STOCK) {
             // Handle stock card click - flip and move to waste
             m_solitaireWidget->game().handleStockCardClick();
             m_solitaireWidget->layoutGame();
@@ -265,4 +301,37 @@ void CardItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
         }
     }
     event->ignore();
+}
+
+bool CardItem::isValidMove(const GameState &state, const vector<CardItem *> &draggedCardItems, Pile *sourcePile, Pile *destPile)
+{
+    if (sourcePile == nullptr || destPile == nullptr || draggedCardItems.empty()) {
+        return false;
+    } else if (sourcePile == destPile) {
+        return false;
+    } else if (destPile->type == STOCK) {
+        return false;
+    } else if (destPile->type == WASTE) {
+        return false;
+    } else if (destPile->type == STACK) {
+        if (draggedCardItems.size() != 1) {
+            return false;
+        }
+        const auto &card = draggedCardItems[0]->card();
+        if (destPile->cards.empty()) {
+            if (card.rank != ACE) {
+                return false;
+            }
+        } else {
+            const auto &topCard = destPile->cards.back();
+            // Must be same suit and one rank higher
+            if (card.suit != topCard.suit || card.rank != topCard.rank + 1) {
+                return false;
+            }
+        }
+    } else if (destPile->type == TABLE) {
+        return false;
+    }
+
+    return true;
 }

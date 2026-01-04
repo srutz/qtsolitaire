@@ -7,7 +7,7 @@
 SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
 {
     m_scene = new QGraphicsScene(this);
-    m_scene->setBackgroundBrush(QColor(107, 114, 128)); // Green background
+    m_scene->setBackgroundBrush(QColor(107, 114, 128));
     auto graphicsView = new QGraphicsView(m_scene, this);
     graphicsView->setObjectName("graphicsView");
     graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -134,11 +134,25 @@ void SolitaireWidget::setHighlightedPile(PileItem *pile)
     if (m_highlightedPile != nullptr) {
         m_highlightedPile->setHighlighted(false);
     }
+    if (m_highlightedCard != nullptr) {
+        m_highlightedCard->setHighlighted(false);
+        m_highlightedCard = nullptr;
+    }
 
     m_highlightedPile = pile;
 
     if (m_highlightedPile != nullptr) {
         m_highlightedPile->setHighlighted(true);
+
+        // Highlight the top card if the pile has cards
+        Pile *actualPile = m_game.getPile(pile->pile().type, pile->pile().index);
+        if (actualPile && !actualPile->cards.empty()) {
+            const Card &topCard = actualPile->cards.back();
+            m_highlightedCard = findCardItem(topCard);
+            if (m_highlightedCard != nullptr) {
+                m_highlightedCard->setHighlighted(true);
+            }
+        }
     }
 }
 
@@ -166,7 +180,7 @@ PileItem *SolitaireWidget::findPileItemAt(const QPointF &scenePos)
 
 Pile *SolitaireWidget::getPileForPileItem(PileItem *pileItem)
 {
-    if (!pileItem) {
+    if (pileItem == nullptr) {
         return nullptr;
     }
     return m_game.getPile(pileItem->pile().type, pileItem->pile().index);

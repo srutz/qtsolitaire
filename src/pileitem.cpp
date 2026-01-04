@@ -26,7 +26,7 @@ void PileItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     // Use different color when highlighted
     if (m_highlighted) {
         painter->setBrush(QColor::fromRgb(0x9ca3af));
-        painter->setPen(QColor::fromRgb(0x374151)); // Bright green border
+        painter->setPen(QColor::fromRgb(0x374151));
     } else {
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QColor::fromRgb(0x4b5563));

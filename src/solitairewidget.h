@@ -21,6 +21,7 @@ class SolitaireWidget : public QWidget
     QPixmap s_backPixmap;
     vector<CardItem *> m_draggedCardItems;
     PileItem *m_highlightedPile = nullptr;
+    CardItem *m_highlightedCard = nullptr;
 
     void initPixmap();
     CardItem *findCardItem(const Card &card) const;
