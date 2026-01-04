@@ -1,14 +1,17 @@
 #include "game.h"
 #include <QDebug>
+#include <QFile>
+#include <QJsonDocument>
+#include <QStandardPaths>
 #include <algorithm>
 #include <random>
 
 using namespace std;
 
-void Game::saveState()
+void Game::pushState()
 {
     // Remove any states after the current pointer (if we're not at the end)
-    if (m_historyPointer < m_history.size() - 1) {
+    if (m_history.size() > 0 && m_historyPointer < m_history.size() - 1) {
         m_history.erase(m_history.begin() + m_historyPointer + 1, m_history.end());
     }
 
@@ -22,6 +25,14 @@ void Game::saveState()
         m_history.erase(m_history.begin());
         m_historyPointer--;
     }
+}
+
+void Game::setState(const GameState &state)
+{
+    m_state = state;
+    m_history.clear();
+    m_historyPointer = 0;
+    pushState();
 }
 
 bool Game::canUndo() const { return m_historyPointer > 0; }
@@ -41,6 +52,36 @@ void Game::redo()
     if (canRedo()) {
         m_historyPointer++;
         m_state = m_history[m_historyPointer];
+    }
+}
+
+void Game::saveToFile() const
+{
+    QString homeDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    QString filePath = homeDir + "/.qtsolitaire.json";
+    QJsonObject obj = m_state.toJson();
+    QFile saveFile(filePath);
+    if (saveFile.open(QIODevice::WriteOnly)) {
+        saveFile.write(QJsonDocument(obj).toJson());
+        saveFile.close();
+    }
+}
+
+void Game::loadFromFile()
+{
+    QString homeDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    QString filePath = homeDir + "/.qtsolitaire.json";
+    QFile loadFile(filePath);
+    if (loadFile.exists() && loadFile.open(QIODevice::ReadOnly)) {
+        QByteArray data = loadFile.readAll();
+        QJsonDocument loadDoc(QJsonDocument::fromJson(data));
+        if (!loadDoc.isNull()) {
+            m_state = GameState::fromJson(loadDoc.object());
+            m_history.clear();
+            m_historyPointer = 0;
+            pushState();
+        }
+        loadFile.close();
     }
 }
 
@@ -102,7 +143,7 @@ bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *de
     }
 
     // Save state before making changes
-    saveState();
+    pushState();
 
     // Find the position of the first card to move in the source pile
     size_t startIndex = 0;
@@ -136,7 +177,6 @@ bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *de
     if (sourcePile->type == TABLE && !sourcePile->cards.empty()) {
         sourcePile->cards.back().side = FRONT;
     }
-
     return true;
 }
 
@@ -144,7 +184,7 @@ void Game::handleStockCardClick()
 {
     if (!m_state.stock.cards.empty()) {
         // Save state before making changes
-        saveState();
+        pushState();
         // Take the top card from stock
         Card topCard = m_state.stock.cards.back();
         m_state.stock.cards.pop_back();
@@ -158,7 +198,7 @@ void Game::handleStockCardClick()
 void Game::recycleWasteToStock()
 {
     // Save state before making changes
-    saveState();
+    pushState();
 
     // Move all cards from waste back to stock with back side
     while (!m_state.waste.cards.empty()) {
@@ -269,19 +309,6 @@ QString Pile::toString() const
         .arg(index)
         .arg(cards.size())
         .arg(cardStrs.join(", "));
-}
-
-void GameState::dump() const
-{
-
-    qDebug() << "stock:" << stock.toString();
-    qDebug() << "waste:" << waste.toString();
-    for (const auto &stack : stacks) {
-        qDebug() << "stack:" << stack.toString();
-    }
-    for (const auto &table : tables) {
-        qDebug() << "table:" << table.toString();
-    }
 }
 
 Game::Game(QObject *parent) : QObject(parent) { resetGame(); }
