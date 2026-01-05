@@ -255,15 +255,14 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             }
 
             // Check if there's a pile under the cursor
-            PileItem *destPileItem = m_solitaireWidget->findPileItemAt(event->scenePos());
+            auto *destPileItem = m_solitaireWidget->findPileItemAt(event->scenePos());
 
             if (destPileItem != nullptr) {
                 // Find the source pile
-                Pile *sourcePile = m_solitaireWidget->game().getPileContainingCard(draggedCards[0]->card());
+                auto *sourcePile = m_solitaireWidget->game().getPileContainingCard(draggedCards[0]->card());
 
                 // Get destination pile
-                Pile *destPile = m_solitaireWidget->getPileForPileItem(destPileItem);
-
+                auto *destPile = m_solitaireWidget->getPileForPileItem(destPileItem);
                 if (!isValidMove(draggedCards, sourcePile, destPile)) {
                     // Invalid move, return cards to original positions
                     for (size_t i = 0; i < draggedCards.size(); ++i) {

@@ -7,9 +7,12 @@
 
 using std::vector;
 
-enum Suit { HEARTS, DIAMONDS, CLUBS, SPADES };
+/* the following enums are externalized, you break the save file format if you change
+ * the ordinals */
+enum Suit { HEARTS = 1, DIAMONDS, CLUBS, SPADES };
 enum Rank { ACE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING };
-enum Side { FRONT, BACK };
+enum Side { FRONT = 1, BACK };
+enum PileType { STOCK = 1, WASTE, STACK, TABLE };
 
 struct Card {
     Suit suit;
@@ -18,8 +21,6 @@ struct Card {
     QString toString() const;
 };
 
-enum PileType { STOCK, WASTE, STACK, TABLE };
-
 struct Pile {
     PileType type;
     int index = -1;
@@ -27,7 +28,7 @@ struct Pile {
     QString toString() const;
 };
 
-enum GameStatus { STOPPED, RUNNING, WON, LAUNCHING };
+enum GameStatus { STOPPED = 1, RUNNING, WON, LAUNCHING };
 
 struct GameState {
     Pile stock;
