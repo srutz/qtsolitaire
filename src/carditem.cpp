@@ -151,6 +151,14 @@ void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
             m_solitaireWidget->layoutGame();
             event->accept();
             return;
+        } else if (pile != nullptr && (pile->type == TABLE || pile->type == WASTE)) {
+            // get topcard of table pile
+            if (!pile->cards.empty()) {
+                if (m_solitaireWidget->game().handleTableCardClick(pile)) {
+                    m_solitaireWidget->layoutGame();
+                    return;
+                }
+            }
         }
     }
 

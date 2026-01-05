@@ -30,6 +30,8 @@ class Game : public QObject
     Pile *getPile(PileType type, int index);
     bool moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile);
     void handleStockCardClick();
+    bool handleTableCardClick(Pile *pile);
+
     void recycleWasteToStock();
 
     // Undo/redo support

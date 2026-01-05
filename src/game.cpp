@@ -195,6 +195,31 @@ void Game::handleStockCardClick()
     }
 }
 
+bool Game::handleTableCardClick(Pile *pile)
+{
+    if (pile->cards.empty()) {
+        return false;
+    }
+    // find a matching non empty stack
+    for (auto &stack : m_state.stacks) {
+        const auto &topTableCard = pile->cards.back();
+        auto ace = topTableCard.rank == ACE;
+        if (ace && stack.cards.empty()) {
+            moveCardsToPile({topTableCard}, pile, &stack);
+            return true;
+        } else if (stack.cards.empty()) {
+            continue;
+        }
+
+        const auto &topStackCard = stack.cards.back();
+        if (topTableCard.suit == topStackCard.suit && topTableCard.rank == topStackCard.rank + 1) {
+            moveCardsToPile({topTableCard}, pile, &stack);
+            return true;
+        }
+    }
+    return false;
+}
+
 void Game::recycleWasteToStock()
 {
     // Save state before making changes
