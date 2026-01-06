@@ -241,7 +241,7 @@ void Game::recycleWasteToStock()
 
 QPoint pileTypeAnchorPoint(PileType type)
 {
-    auto left = -100;
+    auto left = -80;
     auto topLine = -140;
     auto bottomLine = 140;
     switch (type) {
@@ -262,7 +262,7 @@ int stackingDistance(PileType type)
 {
     switch (type) {
     case TABLE:
-        return 18;
+        return 21;
     default:
         return 3;
     }

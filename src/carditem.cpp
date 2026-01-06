@@ -235,7 +235,7 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     if (event->button() == Qt::LeftButton && !m_dragging) {
         // Handle stock card click - flip and move to waste
         Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
-        qDebug() << "Clicked card:" << m_card.toString() << " in pile:" << (pile ? pile->toString() : "null");
+        // qDebug() << "Clicked card:" << m_card.toString() << " in pile:" << (pile ? pile->toString() : "null");
         if (pile != nullptr && pile->type == STOCK) {
             m_solitaireWidget->game().handleStockCardClick();
             m_solitaireWidget->layoutGame();
