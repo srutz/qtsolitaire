@@ -241,17 +241,18 @@ void Game::recycleWasteToStock()
 
 QPoint pileTypeAnchorPoint(PileType type)
 {
-    auto topLine = 20;
-    auto bottomLine = 280;
+    auto left = -100;
+    auto topLine = -140;
+    auto bottomLine = 140;
     switch (type) {
     case STOCK:
-        return QPoint(50, topLine);
+        return QPoint(left, topLine);
     case WASTE:
-        return QPoint(50 + CARD_WIDTH + CARD_XDISTANCE, topLine);
+        return QPoint(left + CARD_WIDTH + CARD_XDISTANCE, topLine);
     case STACK:
-        return QPoint(50 + 3 * (CARD_WIDTH + CARD_XDISTANCE), topLine);
+        return QPoint(left + 3 * (CARD_WIDTH + CARD_XDISTANCE), topLine);
     case TABLE:
-        return QPoint(50, bottomLine);
+        return QPoint(left, bottomLine);
     default:
         return QPoint(0, 0);
     }

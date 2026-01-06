@@ -13,6 +13,9 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
     graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     graphicsView->setInteractive(true);
+    graphicsView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    graphicsView->setResizeAnchor(QGraphicsView::NoAnchor);
+    graphicsView->setTransformationAnchor(QGraphicsView::NoAnchor);
     // graphicsView->setDragMode(QGraphicsView::NoDrag);
 
     auto layout = new QVBoxLayout(this);
