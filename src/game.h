@@ -44,6 +44,9 @@ class Game : public QObject
     // Persistence
     void saveToFile() const;
     void loadFromFile();
+
+  signals:
+    void undoRedoStateChanged();
 };
 
 const int CARD_WIDTH = 100;

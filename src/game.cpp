@@ -25,6 +25,7 @@ void Game::pushState()
         m_history.erase(m_history.begin());
         m_historyPointer--;
     }
+    emit undoRedoStateChanged();
 }
 
 void Game::setState(const GameState &state)
@@ -44,6 +45,7 @@ void Game::undo()
     if (canUndo()) {
         m_historyPointer--;
         m_state = m_history[m_historyPointer];
+        emit undoRedoStateChanged();
     }
 }
 
@@ -51,7 +53,10 @@ void Game::redo()
 {
     if (canRedo()) {
         m_historyPointer++;
+        // qDebug() << "oldstate before redo:" << m_state.toJson();
         m_state = m_history[m_historyPointer];
+        // qDebug() << "newstate after  redo:" << m_state.toJson();
+        emit undoRedoStateChanged();
     }
 }
 
@@ -142,9 +147,6 @@ bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *de
         return false;
     }
 
-    // Save state before making changes
-    pushState();
-
     // Find the position of the first card to move in the source pile
     size_t startIndex = 0;
     bool found = false;
@@ -177,6 +179,9 @@ bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *de
     if (sourcePile->type == TABLE && !sourcePile->cards.empty()) {
         sourcePile->cards.back().side = FRONT;
     }
+
+    // Save state to undostack
+    pushState();
     return true;
 }
 

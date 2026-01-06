@@ -62,6 +62,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         solitaireWidget->game().redo();
         solitaireWidget->layoutGame();
     });
+
+    const auto &game = solitaireWidget->game();
+    connect(&game, &Game::undoRedoStateChanged, [actionUndo, actionRedo, &game]() {
+        actionUndo->setEnabled(game.canUndo());
+        actionRedo->setEnabled(game.canRedo());
+    });
+    actionUndo->setEnabled(game.canUndo());
+    actionRedo->setEnabled(game.canRedo());
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) { QMainWindow::resizeEvent(event); }

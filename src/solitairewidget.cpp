@@ -91,7 +91,7 @@ PileItem *SolitaireWidget::findPileItem(PileType type, int index) const
 
 void SolitaireWidget::layoutGame()
 {
-    const GameState &state = m_game.state();
+    const auto &state = m_game.state();
 
     auto layoutPile = [this](const Pile &pile, QPoint pos) {
         auto *pileItem = findPileItem(pile.type, pile.index);
