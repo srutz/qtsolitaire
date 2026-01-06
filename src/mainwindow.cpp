@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     auto menuEdit = menuBar->addMenu(tr("&Edit"));
 
     auto actionNewGame = menuFile->addAction(tr("&New Game"));
+    actionNewGame->setShortcut(QKeySequence::New);
     connect(actionNewGame, &QAction::triggered, [solitaireWidget]() {
         solitaireWidget->game().resetGame();
         solitaireWidget->layoutGame();
@@ -47,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     menuFile->addSeparator();
     auto actionExit = menuFile->addAction(tr("E&xit"));
+    actionExit->setShortcut(QKeySequence::Quit);
     connect(actionExit, &QAction::triggered, this, &QMainWindow::close);
 
     auto actionUndo = menuEdit->addAction(tr("&Undo"));

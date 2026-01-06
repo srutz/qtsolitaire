@@ -143,25 +143,7 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
 void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
-        // Handle stock card click - flip and move to waste
-        Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
-        if (pile != nullptr && pile->type == STOCK) {
-            m_solitaireWidget->game().handleStockCardClick();
-            m_solitaireWidget->layoutGame();
-            event->accept();
-            return;
-        } else if (pile != nullptr && (pile->type == TABLE || pile->type == WASTE)) {
-            // get topcard of table pile
-            if (!pile->cards.empty()) {
-                if (m_solitaireWidget->game().handleTableCardClick(pile)) {
-                    m_solitaireWidget->layoutGame();
-                    return;
-                }
-            }
-        }
-    }
-
+    m_dragging = false;
     if (event->button() == Qt::LeftButton && m_card.side == FRONT) {
         m_dragStartPos = pos();
 
@@ -216,6 +198,9 @@ void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
         setCursor(Qt::OpenHandCursor);
         event->accept();
+    } else if (event->button() == Qt::LeftButton) {
+        // release event should survice
+        event->accept();
     } else {
         event->ignore();
     }
@@ -225,6 +210,7 @@ void CardItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     auto &draggedCards = m_solitaireWidget->draggedCardItems();
     if (!draggedCards.empty() && draggedCards[0] == this) {
+        m_dragging = true;
         QPointF delta = event->scenePos() - event->buttonDownScenePos(Qt::LeftButton);
 
         // Move all dragged cards together, maintaining their relative positions
@@ -246,7 +232,25 @@ void CardItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (event->button() == Qt::LeftButton && !m_dragging) {
+        // Handle stock card click - flip and move to waste
+        Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
+        qDebug() << "Clicked card:" << m_card.toString() << " in pile:" << (pile ? pile->toString() : "null");
+        if (pile != nullptr && pile->type == STOCK) {
+            m_solitaireWidget->game().handleStockCardClick();
+            m_solitaireWidget->layoutGame();
+            event->accept();
+            return;
+        } else if (pile != nullptr && (pile->type == TABLE || pile->type == WASTE)) {
+            // get topcard of table pile
+            if (!pile->cards.empty()) {
+                if (m_solitaireWidget->game().handleTableCardClick(pile)) {
+                    m_solitaireWidget->layoutGame();
+                    return;
+                }
+            }
+        }
+    } else if (event->button() == Qt::LeftButton) {
         auto &draggedCards = m_solitaireWidget->draggedCardItems();
         if (!draggedCards.empty() && draggedCards[0] == this) {
             // Reset z-value for all dragged cards

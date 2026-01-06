@@ -89,23 +89,23 @@ PileItem *SolitaireWidget::findPileItem(PileType type, int index) const
     return nullptr;
 }
 
-void SolitaireWidget::layoutGame()
+void SolitaireWidget::layoutGame(bool delayed)
 {
     const auto &state = m_game.state();
-
-    auto layoutPile = [this](const Pile &pile, QPoint pos) {
+    auto layoutPile = [this, delayed](const Pile &pile, QPoint pos) {
         auto *pileItem = findPileItem(pile.type, pile.index);
         pileItem->setPos(pos);
         auto yOffset = 0;
         auto yDistance = stackingDistance(pile.type);
         qreal zValue = 0;
-        for (const auto &card : pile.cards) {
+        for (auto index = 0; const auto &card : pile.cards) {
             auto *cardItem = findCardItem(card);
             cardItem->setCard(card); // Update card with current side
-            cardItem->setPosAnimated(QPoint(pos.x(), pos.y() + yOffset), 80);
+            cardItem->setPosAnimated(QPoint(pos.x(), pos.y() + yOffset), 80, delayed ? 2500 + 180 * index : 0);
             cardItem->setZValue(zValue);
             yOffset += yDistance;
             zValue += 1;
+            ++index;
         }
     };
     layoutPile(state.stock, pileTypeAnchorPoint(PileType::STOCK));

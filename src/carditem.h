@@ -17,6 +17,7 @@ class CardItem : public AnimatedItem
     bool m_pixmapLoaded = false;
     bool m_highlighted = false;
     QPointF m_dragStartPos;
+    bool m_dragging = false;
     vector<QPointF> m_draggedCardStartPositions;
 
     void initPixmap();

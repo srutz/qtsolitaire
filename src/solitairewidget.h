@@ -33,7 +33,7 @@ class SolitaireWidget : public QWidget
 
     const QPixmap &backPixmap() const { return s_backPixmap; }
     Game &game() { return m_game; }
-    void layoutGame();
+    void layoutGame(bool delayed = false);
 
     vector<CardItem *> &draggedCardItems() { return m_draggedCardItems; }
     void clearDraggedCards() { m_draggedCardItems.clear(); }
