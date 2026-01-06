@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     actionNewGame->setShortcut(QKeySequence::New);
     connect(actionNewGame, &QAction::triggered, [solitaireWidget]() {
         solitaireWidget->game().resetGame();
-        solitaireWidget->layoutGame();
+        solitaireWidget->layoutGame(true);
     });
     menuFile->addSeparator();
 

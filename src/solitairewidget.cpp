@@ -44,7 +44,7 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
         }
     }
     initPixmap();
-    layoutGame();
+    layoutGame(true);
 }
 
 SolitaireWidget::~SolitaireWidget()
@@ -92,20 +92,37 @@ PileItem *SolitaireWidget::findPileItem(PileType type, int index) const
 void SolitaireWidget::layoutGame(bool delayed)
 {
     const auto &state = m_game.state();
-    auto layoutPile = [this, delayed](const Pile &pile, QPoint pos) {
+    qreal globalZValue = 0;
+    auto layoutPile = [this, delayed, &globalZValue](const Pile &pile, QPoint pos) {
         auto *pileItem = findPileItem(pile.type, pile.index);
         pileItem->setPos(pos);
         auto yOffset = 0;
         auto yDistance = stackingDistance(pile.type);
-        qreal zValue = 0;
+        auto pileDuration = 500;
+        qreal baseZValue = globalZValue;
         for (auto index = 0; const auto &card : pile.cards) {
             auto *cardItem = findCardItem(card);
             cardItem->setCard(card); // Update card with current side
-            cardItem->setPosAnimated(QPoint(pos.x(), pos.y() + yOffset), 80, delayed ? 2500 + 180 * index : 0);
-            cardItem->setZValue(zValue);
+            if (delayed) {
+                cardItem->setPos(QPoint(-200, -200));
+            }
+            cardItem->setPosAnimated(
+                QPoint(pos.x(), pos.y() + yOffset), 80, delayed ? 50 + (pileDuration / pile.cards.size() * index) : 0);
+
+            // When dealing with delay, use global z-order to ensure proper layering during animation
+            if (delayed) {
+                cardItem->setZValue(globalZValue);
+                globalZValue += 1;
+            } else {
+                cardItem->setZValue(baseZValue + index);
+            }
+
             yOffset += yDistance;
-            zValue += 1;
             ++index;
+        }
+
+        if (!delayed) {
+            globalZValue += pile.cards.size();
         }
     };
     layoutPile(state.stock, pileTypeAnchorPoint(PileType::STOCK));
