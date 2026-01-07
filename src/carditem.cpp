@@ -144,6 +144,7 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     m_dragging = false;
+    m_dragStartMousePos = event->scenePos();
     if (event->button() == Qt::LeftButton && m_card.side == FRONT) {
         m_dragStartPos = pos();
 
@@ -232,7 +233,8 @@ void CardItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && !m_dragging) {
+    double dragDistance = QPointF(event->scenePos() - m_dragStartMousePos).manhattanLength();
+    if (event->button() == Qt::LeftButton && !m_dragging && dragDistance < 5.0) {
         // Handle stock card click - flip and move to waste
         Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
         // qDebug() << "Clicked card:" << m_card.toString() << " in pile:" << (pile ? pile->toString() : "null");

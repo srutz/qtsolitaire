@@ -18,6 +18,7 @@ class CardItem : public AnimatedItem
     bool m_highlighted = false;
     QPointF m_dragStartPos;
     bool m_dragging = false;
+    QPointF m_dragStartMousePos; // just for distance calculation
     vector<QPointF> m_draggedCardStartPositions;
 
     void initPixmap();
