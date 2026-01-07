@@ -11,5 +11,6 @@
     "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
         "readability-identifier-length",
         "readability-magic-numbers"
-    ]
+    ],
+    "workbench.colorTheme": "Visual Studio Light - C++"
 }

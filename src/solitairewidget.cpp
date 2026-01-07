@@ -103,7 +103,8 @@ void SolitaireWidget::layoutGame(bool delayed)
         auto yDistance = stackingDistance(pile.type);
         auto pileDuration = 500;
         qreal baseZValue = globalZValue;
-        for (auto index = 0; const auto &card : pile.cards) {
+        auto index = 0;
+        for (const auto &card : pile.cards) {
             auto *cardItem = findCardItem(card);
             cardItem->setCard(card); // Update card with current side
             if (delayed) {
