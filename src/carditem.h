@@ -31,8 +31,8 @@ class CardItem : public AnimatedItem
     const Card &card() const { return m_card; }
     void setCard(const Card &card);
     void setHighlighted(bool highlighted);
-    virtual QRectF boundingRect() const;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual QRectF boundingRect() const override;
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
   protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;

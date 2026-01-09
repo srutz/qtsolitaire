@@ -178,12 +178,14 @@ void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
         findCardsInPile(state.waste);
         for (const auto &stack : state.stacks) {
-            if (!foundThisCard)
+            if (!foundThisCard) {
                 findCardsInPile(stack);
+            }
         }
         for (const auto &table : state.tables) {
-            if (!foundThisCard)
+            if (!foundThisCard) {
                 findCardsInPile(table);
+            }
         }
 
         // Store original positions for all dragged cards
@@ -243,13 +245,11 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             m_solitaireWidget->layoutGame();
             event->accept();
             return;
-        } else if (pile != nullptr && (pile->type == TABLE || pile->type == WASTE)) {
+        } else if (pile != nullptr && !pile->cards.empty() && (pile->type == TABLE || pile->type == WASTE)) {
             // get topcard of table pile
-            if (!pile->cards.empty()) {
-                if (m_solitaireWidget->game().handleTableCardClick(pile)) {
-                    m_solitaireWidget->layoutGame();
-                    return;
-                }
+            if (m_solitaireWidget->game().handleTableCardClick(pile)) {
+                m_solitaireWidget->layoutGame();
+                return;
             }
         }
     } else if (event->button() == Qt::LeftButton) {

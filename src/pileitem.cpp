@@ -43,10 +43,10 @@ void PileItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
 void PileItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && m_pile.type == STOCK && m_solitaireWidget) {
+    if (event->button() == Qt::LeftButton && m_pile.type == STOCK && m_solitaireWidget != nullptr) {
         // Check if stock pile is empty
         Pile *stockPile = m_solitaireWidget->game().getPile(STOCK, -1);
-        if (stockPile && stockPile->cards.empty()) {
+        if (stockPile != nullptr && stockPile->cards.empty()) {
             // Recycle waste back to stock
             m_solitaireWidget->game().recycleWasteToStock();
             m_solitaireWidget->layoutGame();
