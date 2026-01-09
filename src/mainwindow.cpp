@@ -1,8 +1,11 @@
 #include "mainwindow.h"
+#include "backgroundwork.h"
+#include "backgroundwork_concurrent.h"
 #include "solitairewidget.h"
 #include <QFile>
 #include <QMenuBar>
 #include <QStandardPaths>
+#include <QThread>
 #include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -72,6 +75,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     });
     actionUndo->setEnabled(game.canUndo());
     actionRedo->setEnabled(game.canRedo());
+
+    // test background work
+    menuFile->addSeparator();
+    QThread::currentThread()->setObjectName("Main-Thread");
+    auto actionBackground = menuFile->addAction(tr("Background work"));
+    connect(actionBackground, &QAction::triggered, [this]() {
+        auto worker = []() {
+            qDebug() << QThread::currentThread() << "working";
+            QThread::msleep(5'000);
+            return QString("Result123");
+        };
+        auto callback = [](QString result) { qDebug() << QThread::currentThread() << "got result" << result; };
+        runInBackgroundConcurrent<QString>(this, worker, callback);
+    });
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) { QMainWindow::resizeEvent(event); }
