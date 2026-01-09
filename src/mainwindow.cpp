@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
             return QString("Result123");
         };
         auto callback = [](QString result) { qDebug() << QThread::currentThread() << "got result" << result; };
-        runInBackgroundConcurrent<QString>(this, worker, callback);
+        runInBackground<QString>(this, worker, callback);
     });
 }
 
