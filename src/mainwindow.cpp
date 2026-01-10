@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "backgroundwork.h"
+#include "gamestartview.h"
 #include "solitairewidget.h"
 #include <QFile>
 #include <QMenuBar>
@@ -18,8 +19,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     layout->setSpacing(0);
     centralWidget->setLayout(layout);
 
+    auto *stackContainer = new QWidget(centralWidget);
+    layout->addWidget(stackContainer);
+
+    m_stackedLayout = new QStackedLayout(stackContainer);
+
+    auto *gameStartView = new GameStartView(stackContainer);
+    m_stackedLayout->addWidget(gameStartView);
+
     auto *solitaireWidget = new SolitaireWidget(centralWidget);
-    layout->addWidget(solitaireWidget);
+    m_stackedLayout->addWidget(solitaireWidget);
 
     // add menubar and file exit menu
     auto *menuBar = new QMenuBar(this);

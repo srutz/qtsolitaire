@@ -2,18 +2,20 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStackedLayout>
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
+  public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-protected:
+  protected:
     void resizeEvent(QResizeEvent *event) override;
 
-private:
+  private:
+    QStackedLayout *m_stackedLayout;
 };
 #endif // MAINWINDOW_H
