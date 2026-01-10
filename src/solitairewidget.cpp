@@ -115,6 +115,7 @@ void SolitaireWidget::layoutGame(bool delayed)
                 QPoint offscreenPos(-200, -200);
                 cardItem->setPos(offscreenPos);
             }
+
             cardItem->setPosAnimated(
                 QPoint(pos.x(), pos.y() + yOffset), 80, delayed ? 50 + (pileDuration / pile.cards.size() * index) : 0);
 
