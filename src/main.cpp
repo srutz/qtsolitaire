@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     QApplication::setStyle(QStyleFactory::create("Fusion"));
     QApplication a(argc, argv);
     MainWindow w;
-    w.resize(1100, 800);
+    w.resize(820 + 160, 800);
     w.setWindowTitle("Qt-Solitaire");
     auto *screen = QGuiApplication::primaryScreen();
     auto screenGeometry = screen->geometry();

@@ -241,9 +241,9 @@ void Game::recycleWasteToStock()
 
 QPoint pileTypeAnchorPoint(PileType type)
 {
-    auto left = -80;
-    auto topLine = -140;
-    auto bottomLine = 140;
+    auto left = 80;
+    auto topLine = 50;
+    auto bottomLine = 330;
     switch (type) {
     case STOCK:
         return QPoint(left, topLine);

@@ -6,6 +6,7 @@
 #include "game.h"
 #include "pileitem.h"
 #include <QGraphicsScene>
+#include <QGraphicsView>
 #include <QPixmap>
 #include <QWidget>
 
@@ -14,6 +15,7 @@ class SolitaireWidget : public QWidget
     Q_OBJECT
 
     QGraphicsScene *m_scene = nullptr;
+    QGraphicsView *m_graphicsView = nullptr;
     Game m_game;
     vector<PileItem *> m_pileItems;
     vector<CardItem *> m_cardItems;
