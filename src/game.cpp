@@ -141,10 +141,10 @@ Pile *Game::getPile(PileType type, int index)
     return nullptr;
 }
 
-bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile)
+vector<Card> Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile)
 {
     if (sourcePile == nullptr || destPile == nullptr || cards.empty()) {
-        return false;
+        return {};
     }
 
     // Find the position of the first card to move in the source pile
@@ -159,17 +159,19 @@ bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *de
     }
 
     if (!found) {
-        return false;
+        return {};
     }
 
     // Verify that all cards to move are consecutive in the source pile
     if (startIndex + cards.size() > sourcePile->cards.size()) {
-        return false;
+        return {};
     }
 
+    vector<Card> toMove;
     // Move cards to destination pile
     for (const auto &card : cards) {
         destPile->cards.push_back(card);
+        toMove.push_back(card);
     }
 
     // Remove cards from source pile
@@ -182,11 +184,12 @@ bool Game::moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *de
 
     // Save state to undostack
     pushState();
-    return true;
+    return toMove;
 }
 
-void Game::handleStockCardClick()
+vector<Card> Game::handleStockCardClick()
 {
+    vector<Card> movedCards;
     if (!m_state.stock.cards.empty()) {
         // Save state before making changes
         pushState();
@@ -197,32 +200,34 @@ void Game::handleStockCardClick()
         topCard.side = FRONT;
         // Put it on waste
         m_state.waste.cards.push_back(topCard);
+        movedCards.push_back(topCard);
     }
+    return movedCards;
 }
 
-bool Game::handleTableCardClick(Pile *pile)
+vector<Card> Game::handleTableCardClick(Pile *pile)
 {
     if (pile->cards.empty()) {
-        return false;
+        return {};
     }
     // find a matching non empty stack
     for (auto &stack : m_state.stacks) {
         const auto &topTableCard = pile->cards.back();
         auto ace = topTableCard.rank == ACE;
         if (ace && stack.cards.empty()) {
-            moveCardsToPile({topTableCard}, pile, &stack);
-            return true;
+            auto cards = moveCardsToPile({topTableCard}, pile, &stack);
+            return cards;
         } else if (stack.cards.empty()) {
             continue;
         }
 
         const auto &topStackCard = stack.cards.back();
         if (topTableCard.suit == topStackCard.suit && topTableCard.rank == topStackCard.rank + 1) {
-            moveCardsToPile({topTableCard}, pile, &stack);
-            return true;
+            auto cards = moveCardsToPile({topTableCard}, pile, &stack);
+            return cards;
         }
     }
-    return false;
+    return {};
 }
 
 void Game::recycleWasteToStock()
@@ -338,7 +343,7 @@ QString Pile::toString() const
         cardStrs << card.toString() + ((card.side == FRONT) ? "*" : "_");
     }
     return QString("Pile(type=%1, index=%2, size=%3, cards=[%4])")
-        .arg(type)
+        .arg(static_cast<int>(type))
         .arg(index)
         .arg(cards.size())
         .arg(cardStrs.join(", "));

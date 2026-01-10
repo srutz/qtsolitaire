@@ -8,7 +8,7 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
 {
     m_scene = new QGraphicsScene(this);
     m_scene->setBackgroundBrush(QColor(107, 114, 128));
-    auto graphicsView = new QGraphicsView(m_scene, this);
+    auto *graphicsView = new QGraphicsView(m_scene, this);
     graphicsView->setObjectName("graphicsView");
     graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -18,7 +18,7 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
     graphicsView->setTransformationAnchor(QGraphicsView::NoAnchor);
     // graphicsView->setDragMode(QGraphicsView::NoDrag);
 
-    auto layout = new QVBoxLayout(this);
+    auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->addWidget(graphicsView);
@@ -34,7 +34,7 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
         for (const auto &table : m_game.state().tables) {
             m_pileItems.push_back(new PileItem(table, this));
         }
-        for (auto pileItem : m_pileItems) {
+        for (auto *pileItem : m_pileItems) {
             m_scene->addItem(pileItem);
         }
     }
@@ -52,10 +52,10 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
 
 SolitaireWidget::~SolitaireWidget()
 {
-    for (auto cardItem : m_cardItems) {
+    for (auto *cardItem : m_cardItems) {
         delete cardItem;
     }
-    for (auto pileItem : m_pileItems) {
+    for (auto *pileItem : m_pileItems) {
         delete pileItem;
     }
 }
@@ -74,7 +74,7 @@ void SolitaireWidget::initPixmap()
 
 CardItem *SolitaireWidget::findCardItem(const Card &card) const
 {
-    for (auto cardItem : this->m_cardItems) {
+    for (auto *cardItem : this->m_cardItems) {
         if (cardItem->card().suit == card.suit && cardItem->card().rank == card.rank) {
             return cardItem;
         }
@@ -84,7 +84,7 @@ CardItem *SolitaireWidget::findCardItem(const Card &card) const
 
 PileItem *SolitaireWidget::findPileItem(PileType type, int index) const
 {
-    for (auto pileItem : this->m_pileItems) {
+    for (auto *pileItem : this->m_pileItems) {
         if (pileItem->pile().type == type && pileItem->pile().index == index) {
             return pileItem;
         }
@@ -110,6 +110,7 @@ void SolitaireWidget::layoutGame(bool delayed)
             if (delayed) {
                 cardItem->setPos(QPoint(-200, -200));
             }
+
             cardItem->setPosAnimated(
                 QPoint(pos.x(), pos.y() + yOffset), 80, delayed ? 50 + (pileDuration / pile.cards.size() * index) : 0);
 
@@ -165,7 +166,7 @@ void SolitaireWidget::setHighlightedPile(PileItem *pile)
 
         // Highlight the top card if the pile has cards
         Pile *actualPile = m_game.getPile(pile->pile().type, pile->pile().index);
-        if (actualPile && !actualPile->cards.empty()) {
+        if (actualPile != nullptr && !actualPile->cards.empty()) {
             const Card &topCard = actualPile->cards.back();
             m_highlightedCard = findCardItem(topCard);
             if (m_highlightedCard != nullptr) {
@@ -183,7 +184,7 @@ PileItem *SolitaireWidget::findPileItemAt(const QPointF &scenePos)
         // Extend the pile bounds to include all cards in the pile
         const Pile *pile = &pileItem->pile();
         Pile *actualPile = m_game.getPile(pile->type, pile->index);
-        if (actualPile && !actualPile->cards.empty()) {
+        if (actualPile != nullptr && !actualPile->cards.empty()) {
             int numCards = actualPile->cards.size();
             int yDistance = stackingDistance(pile->type);
             int extendedHeight = (numCards - 1) * yDistance + CARD_HEIGHT;

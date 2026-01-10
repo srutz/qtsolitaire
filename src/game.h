@@ -28,9 +28,9 @@ class Game : public QObject
     // Modifier methods for moving cards
     Pile *getPileContainingCard(const Card &card);
     Pile *getPile(PileType type, int index);
-    bool moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile);
-    void handleStockCardClick();
-    bool handleTableCardClick(Pile *pile);
+    vector<Card> moveCardsToPile(const vector<Card> &cards, Pile *sourcePile, Pile *destPile);
+    vector<Card> handleStockCardClick();
+    vector<Card> handleTableCardClick(Pile *pile);
 
     void recycleWasteToStock();
 

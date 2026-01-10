@@ -24,7 +24,6 @@ class SolitaireWidget : public QWidget
     CardItem *m_highlightedCard = nullptr;
 
     void initPixmap();
-    CardItem *findCardItem(const Card &card) const;
     PileItem *findPileItem(PileType pileType, int index) const;
 
   public:
@@ -40,6 +39,7 @@ class SolitaireWidget : public QWidget
     void setHighlightedPile(PileItem *pile);
     PileItem *findPileItemAt(const QPointF &scenePos);
     Pile *getPileForPileItem(PileItem *pileItem);
+    CardItem *findCardItem(const Card &card) const;
 };
 
 #endif // SOLITAIREWIDGET_H

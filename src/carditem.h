@@ -22,7 +22,6 @@ class CardItem : public AnimatedItem
     vector<QPointF> m_draggedCardStartPositions;
 
     void initPixmap();
-    bool isValidMove(const vector<CardItem *> &draggedCardItems, Pile *sourcePile, Pile *destPile);
 
   public:
     CardItem(SolitaireWidget *solitaireWidget, const Card &card, QGraphicsItem *parent = nullptr);

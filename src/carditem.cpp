@@ -6,10 +6,57 @@
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+#include <algorithm>
 
-// Static back image loaded once and shared by all card instances
-// static QPixmap s_backPixmap;
-// static bool s_backPixmapLoaded = false;
+using namespace std;
+
+static bool isValidMove(const vector<CardItem *> &draggedCardItems, Pile *sourcePile, Pile *destPile)
+{
+    if (sourcePile == nullptr || destPile == nullptr || draggedCardItems.empty()) {
+        return false;
+    } else if (sourcePile == destPile) {
+        return false;
+    } else if (destPile->type == STOCK) {
+        return false;
+    } else if (destPile->type == WASTE) {
+        return false;
+    } else if (destPile->type == STACK) {
+        if (draggedCardItems.size() != 1) {
+            return false;
+        }
+        const auto &card = draggedCardItems[0]->card();
+        if (destPile->cards.empty()) {
+            if (card.rank != ACE) {
+                return false;
+            }
+        } else {
+            const auto &topCard = destPile->cards.back();
+            // Must be same suit and one rank higher
+            if (card.suit != topCard.suit || card.rank != topCard.rank + 1) {
+                return false;
+            }
+        }
+    } else if (destPile->type == TABLE) {
+        if (!destPile->cards.empty()) {
+            // Now check the bottom card of the dragged sequence against the top card of the destination pile
+            const auto &topDraggedCard = draggedCardItems[0]->card();
+            const auto &topPileCard = destPile->cards.back();
+
+            // Must be alternating colors and one rank lower
+            auto isRed = [](Suit suit) { return suit == HEARTS || suit == DIAMONDS; };
+            auto isBlack = [](Suit suit) { return suit == CLUBS || suit == SPADES; };
+
+            auto alternatingColors = (isRed(topDraggedCard.suit) && isBlack(topPileCard.suit)) ||
+                                     (isBlack(topDraggedCard.suit) && isRed(topPileCard.suit));
+
+            auto validMove = alternatingColors && topDraggedCard.rank == topPileCard.rank - 1;
+            if (!validMove) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 
 CardItem::CardItem(SolitaireWidget *solitaireWidget, const Card &card, QGraphicsItem *parent)
     : AnimatedItem(parent), m_solitaireWidget(solitaireWidget), m_card(card)
@@ -241,13 +288,26 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
         // qDebug() << "Clicked card:" << m_card.toString() << " in pile:" << (pile ? pile->toString() : "null");
         if (pile != nullptr && pile->type == STOCK) {
-            m_solitaireWidget->game().handleStockCardClick();
+            auto movedCards = m_solitaireWidget->game().handleStockCardClick();
+            for (const auto &card : movedCards) {
+                auto *item = this->m_solitaireWidget->findCardItem(card);
+                if (item != nullptr) {
+                    item->pulse();
+                }
+            }
             m_solitaireWidget->layoutGame();
             event->accept();
             return;
         } else if (pile != nullptr && !pile->cards.empty() && (pile->type == TABLE || pile->type == WASTE)) {
             // get topcard of table pile
-            if (m_solitaireWidget->game().handleTableCardClick(pile)) {
+            auto movedCards = m_solitaireWidget->game().handleTableCardClick(pile);
+            if (movedCards.size() > 0) {
+                for (const auto &card : movedCards) {
+                    auto *item = this->m_solitaireWidget->findCardItem(card);
+                    if (item != nullptr) {
+                        item->pulse();
+                    }
+                }
                 m_solitaireWidget->layoutGame();
                 return;
             }
@@ -273,7 +333,9 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                     // Invalid move, return cards to original positions
                     for (size_t i = 0; i < draggedCards.size(); ++i) {
                         if (i < m_draggedCardStartPositions.size()) {
-                            draggedCards[i]->setPosAnimated(m_draggedCardStartPositions[i]);
+                            auto *cardItem = draggedCards[i];
+                            cardItem->setPosAnimated(m_draggedCardStartPositions[i]);
+                            cardItem->pulse();
                         }
                     }
                     m_solitaireWidget->setHighlightedPile(nullptr);
@@ -287,6 +349,7 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 // push state and move them
                 vector<Card> cardsToMove;
                 for (auto *cardItem : draggedCards) {
+                    cardItem->pulse();
                     cardsToMove.push_back(cardItem->card());
                 }
                 if (destPile != nullptr && sourcePile != nullptr && sourcePile != destPile) {
@@ -303,52 +366,4 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     } else {
         event->ignore();
     }
-}
-
-bool CardItem::isValidMove(const vector<CardItem *> &draggedCardItems, Pile *sourcePile, Pile *destPile)
-{
-    if (sourcePile == nullptr || destPile == nullptr || draggedCardItems.empty()) {
-        return false;
-    } else if (sourcePile == destPile) {
-        return false;
-    } else if (destPile->type == STOCK) {
-        return false;
-    } else if (destPile->type == WASTE) {
-        return false;
-    } else if (destPile->type == STACK) {
-        if (draggedCardItems.size() != 1) {
-            return false;
-        }
-        const auto &card = draggedCardItems[0]->card();
-        if (destPile->cards.empty()) {
-            if (card.rank != ACE) {
-                return false;
-            }
-        } else {
-            const auto &topCard = destPile->cards.back();
-            // Must be same suit and one rank higher
-            if (card.suit != topCard.suit || card.rank != topCard.rank + 1) {
-                return false;
-            }
-        }
-    } else if (destPile->type == TABLE) {
-        if (!destPile->cards.empty()) {
-            // Now check the bottom card of the dragged sequence against the top card of the destination pile
-            const auto &topDraggedCard = draggedCardItems[0]->card();
-            const auto &topPileCard = destPile->cards.back();
-
-            // Must be alternating colors and one rank lower
-            auto isRed = [](Suit suit) { return suit == HEARTS || suit == DIAMONDS; };
-            auto isBlack = [](Suit suit) { return suit == CLUBS || suit == SPADES; };
-
-            auto alternatingColors = (isRed(topDraggedCard.suit) && isBlack(topPileCard.suit)) ||
-                                     (isBlack(topDraggedCard.suit) && isRed(topPileCard.suit));
-
-            auto validMove = alternatingColors && topDraggedCard.rank == topPileCard.rank - 1;
-            if (!validMove) {
-                return false;
-            }
-        }
-    }
-    return true;
 }

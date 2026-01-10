@@ -13,6 +13,7 @@
         "readability-magic-numbers",
         "readability-container-size-empty",
         "readability-math-missing-parentheses",
+        "readability-function-cognitive-complexity",
         "readability-else-after-return"
     ],
     "workbench.colorTheme": "Visual Studio Light - C++"
