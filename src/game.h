@@ -9,10 +9,14 @@
 #include <vector>
 
 using std::vector;
+
+enum GameMode { STOPPED = 1, RUNNING, WON, LAUNCHING };
+
 class Game : public QObject
 {
     Q_OBJECT
 
+    GameMode m_mode = STOPPED;
     GameState m_state;
     vector<GameState> m_history;
     size_t m_historyPointer = 0;
@@ -23,6 +27,10 @@ class Game : public QObject
 
     const GameState &state() const { return m_state; }
     void setState(const GameState &state);
+
+    GameMode mode() const { return m_mode; }
+    void setMode(GameMode mode);
+
     void resetGame();
 
     // Modifier methods for moving cards
@@ -46,6 +54,7 @@ class Game : public QObject
     void loadFromFile();
 
   signals:
+    void modeChanged();
     void undoRedoStateChanged();
 };
 

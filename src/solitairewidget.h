@@ -14,9 +14,9 @@ class SolitaireWidget : public QWidget
 {
     Q_OBJECT
 
+    Game *m_game;
     QGraphicsScene *m_scene = nullptr;
     QGraphicsView *m_graphicsView = nullptr;
-    Game m_game;
     vector<PileItem *> m_pileItems;
     vector<CardItem *> m_cardItems;
     bool m_pixmapLoaded = false;
@@ -29,11 +29,11 @@ class SolitaireWidget : public QWidget
     PileItem *findPileItem(PileType pileType, int index) const;
 
   public:
-    explicit SolitaireWidget(QWidget *parent = nullptr);
+    explicit SolitaireWidget(Game *game, QWidget *parent = nullptr);
     ~SolitaireWidget() override;
 
     const QPixmap &backPixmap() const { return s_backPixmap; }
-    Game &game() { return m_game; }
+    Game *game() { return m_game; }
     void layoutGame(bool delayed = false);
 
     vector<CardItem *> &draggedCardItems() { return m_draggedCardItems; }

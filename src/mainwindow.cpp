@@ -24,10 +24,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     m_stackedLayout = new QStackedLayout(stackContainer);
 
+    auto *game = new Game(this);
+
     auto *gameStartView = new GameStartView(stackContainer);
     m_stackedLayout->addWidget(gameStartView);
 
-    auto *solitaireWidget = new SolitaireWidget(centralWidget);
+    auto *solitaireWidget = new SolitaireWidget(game, centralWidget);
     m_stackedLayout->addWidget(solitaireWidget);
 
     // add menubar and file exit menu
@@ -39,19 +41,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     auto *actionNewGame = menuFile->addAction(tr("&New Game"));
     actionNewGame->setShortcut(QKeySequence::New);
-    connect(actionNewGame, &QAction::triggered, [solitaireWidget]() {
-        solitaireWidget->game().resetGame();
+    connect(actionNewGame, &QAction::triggered, [game, solitaireWidget]() {
+        if (game->mode() == GameMode::STOPPED) {
+            game->setMode(GameMode::RUNNING);
+        }
+        game->resetGame();
         solitaireWidget->layoutGame(true);
     });
     menuFile->addSeparator();
 
     auto *actionLoadGameState = menuFile->addAction(tr("&Load Game State"));
-    connect(actionLoadGameState, &QAction::triggered, [solitaireWidget]() {
-        solitaireWidget->game().loadFromFile();
+    connect(actionLoadGameState, &QAction::triggered, [game, solitaireWidget]() {
+        game->loadFromFile();
         solitaireWidget->layoutGame();
     });
     auto *actionSaveGameState = menuFile->addAction(tr("&Save Game State"));
-    connect(actionSaveGameState, &QAction::triggered, [solitaireWidget]() { solitaireWidget->game().saveToFile(); });
+    connect(actionSaveGameState, &QAction::triggered, [game, solitaireWidget]() { game->saveToFile(); });
 
     // menuFile->addSeparator();
     // auto actionDumpGameState = menuFile->addAction(tr("&Dump Game State"));
@@ -64,25 +69,33 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     auto *actionUndo = menuEdit->addAction(tr("&Undo"));
     actionUndo->setShortcut(QKeySequence::Undo);
-    connect(actionUndo, &QAction::triggered, [solitaireWidget]() {
-        solitaireWidget->game().undo();
+    connect(actionUndo, &QAction::triggered, [game, solitaireWidget]() {
+        game->undo();
         solitaireWidget->layoutGame();
     });
 
     auto *actionRedo = menuEdit->addAction(tr("&Redo"));
     actionRedo->setShortcut(QKeySequence::Redo);
-    connect(actionRedo, &QAction::triggered, [solitaireWidget]() {
-        solitaireWidget->game().redo();
+    connect(actionRedo, &QAction::triggered, [game, solitaireWidget]() {
+        game->redo();
         solitaireWidget->layoutGame();
     });
 
-    const auto &game = solitaireWidget->game();
-    connect(&game, &Game::undoRedoStateChanged, [actionUndo, actionRedo, &game]() {
-        actionUndo->setEnabled(game.canUndo());
-        actionRedo->setEnabled(game.canRedo());
+    connect(game, &Game::undoRedoStateChanged, [actionUndo, actionRedo, game]() {
+        actionUndo->setEnabled(game->canUndo());
+        actionRedo->setEnabled(game->canRedo());
     });
-    actionUndo->setEnabled(game.canUndo());
-    actionRedo->setEnabled(game.canRedo());
+    actionUndo->setEnabled(game->canUndo());
+    actionRedo->setEnabled(game->canRedo());
+
+    connect(game, &Game::modeChanged, [this, game, solitaireWidget, gameStartView]() {
+        if (game->mode() == RUNNING) {
+            m_stackedLayout->setCurrentWidget(solitaireWidget);
+            solitaireWidget->layoutGame(true);
+        } else {
+            m_stackedLayout->setCurrentWidget(gameStartView);
+        }
+    });
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) { QMainWindow::resizeEvent(event); }

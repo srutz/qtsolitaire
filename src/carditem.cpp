@@ -200,7 +200,7 @@ void CardItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
         draggedCards.clear();
 
         // Find which pile this card belongs to and get all cards from this one down
-        const auto &state = m_solitaireWidget->game().state();
+        const auto &state = m_solitaireWidget->game()->state();
         bool foundThisCard = false;
 
         auto findCardsInPile = [&](const Pile &pile) {
@@ -285,10 +285,10 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     double dragDistance = QPointF(event->scenePos() - m_dragStartMousePos).manhattanLength();
     if (event->button() == Qt::LeftButton && !m_dragging && dragDistance < 5.0) {
         // Handle stock card click - flip and move to waste
-        Pile *pile = m_solitaireWidget->game().getPileContainingCard(m_card);
+        Pile *pile = m_solitaireWidget->game()->getPileContainingCard(m_card);
         // qDebug() << "Clicked card:" << m_card.toString() << " in pile:" << (pile ? pile->toString() : "null");
         if (pile != nullptr && pile->type == STOCK) {
-            auto movedCards = m_solitaireWidget->game().handleStockCardClick();
+            auto movedCards = m_solitaireWidget->game()->handleStockCardClick();
             for (const auto &card : movedCards) {
                 auto *item = this->m_solitaireWidget->findCardItem(card);
                 if (item != nullptr) {
@@ -300,7 +300,7 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             return;
         } else if (pile != nullptr && !pile->cards.empty() && (pile->type == TABLE || pile->type == WASTE)) {
             // get topcard of table pile
-            auto movedCards = m_solitaireWidget->game().handleTableCardClick(pile);
+            auto movedCards = m_solitaireWidget->game()->handleTableCardClick(pile);
             if (movedCards.size() > 0) {
                 for (const auto &card : movedCards) {
                     auto *item = this->m_solitaireWidget->findCardItem(card);
@@ -325,7 +325,7 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
             if (destPileItem != nullptr) {
                 // Find the source pile
-                auto *sourcePile = m_solitaireWidget->game().getPileContainingCard(draggedCards[0]->card());
+                auto *sourcePile = m_solitaireWidget->game()->getPileContainingCard(draggedCards[0]->card());
 
                 // Get destination pile
                 auto *destPile = m_solitaireWidget->getPileForPileItem(destPileItem);
@@ -353,7 +353,7 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                     cardsToMove.push_back(cardItem->card());
                 }
                 if (destPile != nullptr && sourcePile != nullptr && sourcePile != destPile) {
-                    m_solitaireWidget->game().moveCardsToPile(cardsToMove, sourcePile, destPile);
+                    m_solitaireWidget->game()->moveCardsToPile(cardsToMove, sourcePile, destPile);
                 }
             }
             m_solitaireWidget->setHighlightedPile(nullptr);

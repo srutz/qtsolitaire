@@ -28,8 +28,6 @@ struct Pile {
     QString toString() const;
 };
 
-enum GameStatus { STOPPED = 1, RUNNING, WON, LAUNCHING };
-
 struct GameState {
     Pile stock;
     Pile waste;

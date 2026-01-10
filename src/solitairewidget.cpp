@@ -4,7 +4,7 @@
 #include <QGraphicsView>
 #include <QVBoxLayout>
 
-SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
+SolitaireWidget::SolitaireWidget(Game *game, QWidget *parent) : QWidget(parent), m_game(game)
 {
     m_scene = new QGraphicsScene(this);
     m_scene->setBackgroundBrush(QColor(107, 114, 128));
@@ -29,12 +29,12 @@ SolitaireWidget::SolitaireWidget(QWidget *parent) : QWidget(parent)
 
     // init the 52 carditems and the 13 piles and keep those objects around forever
     {
-        m_pileItems.push_back(new PileItem(m_game.state().stock, this));
-        m_pileItems.push_back(new PileItem(m_game.state().waste, this));
-        for (const auto &stack : m_game.state().stacks) {
+        m_pileItems.push_back(new PileItem(m_game->state().stock, this));
+        m_pileItems.push_back(new PileItem(m_game->state().waste, this));
+        for (const auto &stack : m_game->state().stacks) {
             m_pileItems.push_back(new PileItem(stack, this));
         }
-        for (const auto &table : m_game.state().tables) {
+        for (const auto &table : m_game->state().tables) {
             m_pileItems.push_back(new PileItem(table, this));
         }
         for (const auto &pileItem : m_pileItems) {
@@ -97,7 +97,7 @@ PileItem *SolitaireWidget::findPileItem(PileType type, int index) const
 
 void SolitaireWidget::layoutGame(bool delayed)
 {
-    const auto &state = m_game.state();
+    const auto &state = m_game->state();
     qreal globalZValue = 0;
     auto layoutPile = [this, delayed, &globalZValue](const Pile &pile, QPoint pos) {
         auto *pileItem = findPileItem(pile.type, pile.index);
@@ -170,7 +170,7 @@ void SolitaireWidget::setHighlightedPile(PileItem *pile)
         m_highlightedPile->setHighlighted(true);
 
         // Highlight the top card if the pile has cards
-        Pile *actualPile = m_game.getPile(pile->pile().type, pile->pile().index);
+        Pile *actualPile = m_game->getPile(pile->pile().type, pile->pile().index);
         if (actualPile != nullptr && !actualPile->cards.empty()) {
             const Card &topCard = actualPile->cards.back();
             m_highlightedCard = findCardItem(topCard);
@@ -188,7 +188,7 @@ PileItem *SolitaireWidget::findPileItemAt(const QPointF &scenePos)
 
         // Extend the pile bounds to include all cards in the pile
         const Pile *pile = &pileItem->pile();
-        Pile *actualPile = m_game.getPile(pile->type, pile->index);
+        Pile *actualPile = m_game->getPile(pile->type, pile->index);
         if (actualPile != nullptr && !actualPile->cards.empty()) {
             int numCards = actualPile->cards.size();
             int yDistance = stackingDistance(pile->type);
@@ -208,5 +208,5 @@ Pile *SolitaireWidget::getPileForPileItem(PileItem *pileItem)
     if (pileItem == nullptr) {
         return nullptr;
     }
-    return m_game.getPile(pileItem->pile().type, pileItem->pile().index);
+    return m_game->getPile(pileItem->pile().type, pileItem->pile().index);
 }

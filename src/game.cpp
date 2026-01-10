@@ -36,6 +36,15 @@ void Game::setState(const GameState &state)
     pushState();
 }
 
+void Game::setMode(GameMode mode)
+{
+    if (m_mode == mode) {
+        return;
+    }
+    m_mode = mode;
+    emit modeChanged();
+}
+
 bool Game::canUndo() const { return m_historyPointer > 0; }
 
 bool Game::canRedo() const { return m_historyPointer < m_history.size() - 1; }
